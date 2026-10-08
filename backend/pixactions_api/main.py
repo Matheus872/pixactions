@@ -35,6 +35,7 @@ def create_app(
         openapi_tags=TAGS,
         docs_url=None,
         redoc_url="/redoc",
+        servers=[{"url": settings.public_api_url, "description": settings.env}],
     )
     engine = engine or make_engine(settings.database_url)
     app.state.settings = settings

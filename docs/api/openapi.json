@@ -1,0 +1,2788 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Pix Actions API",
+    "description": "\n**Pix Actions** lets anyone pay with **Pix** and receive an **onchain asset on Solana**, with no wallet setup.\nThe first use case is event tickets.\n\n## Flow\n1. **Organizer** creates an event (`POST /v1/events`), signs `create_event` with their Privy embedded wallet\n   and submits it (`POST /v1/events/{id}/submit`).\n2. **Buyer** opens the checkout link and creates an order (`POST /v1/orders`), which returns a Pix charge.\n3. When the Pix is confirmed, the on-ramp delivers stablecoins to the buyer's wallet and the order\n   (`GET /v1/orders/{id}`) exposes the `buy_ticket` transaction to sign (`POST /v1/orders/{id}/submit`).\n4. At the door, the organizer scans the ticket and signs `check_in`.\n\n## Transaction pattern: build → sign → submit\nThe API builds every transaction and is always the **fee payer** (users never need SOL). The client signs\nwith the user's wallet; the API checks that the signed message is byte-for-byte the one it issued,\nco-signs and broadcasts.\n\n## Authentication\n`Authorization: Bearer <Privy access token>` (from `getAccessToken()` in the Privy SDK).\n\n## Errors\nEvery error has the shape `{\"error\": {\"code\", \"message\", \"details\"}}`. Codes are stable; see `ErrorResponse`.\nSolana Actions routes follow the Actions spec and return `{\"message\"}` instead.\n\nGuides with sequence diagrams live in `docs/api/` in the repository.\n",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.pixactions.app",
+      "description": "development"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Service health",
+        "description": "Returns the API status plus the Solana cluster, program id, service wallet (fee payer and mock\non-ramp) and payment mint currently in use.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/waitlist": {
+      "post": {
+        "tags": [
+          "Waitlist"
+        ],
+        "summary": "Join the waitlist",
+        "description": "Adds an email to the waitlist. Idempotent by (case-insensitive) email: repeating the call returns\n`created: false` instead of an error.",
+        "operationId": "join_waitlist_v1_waitlist_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaitlistIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaitlistOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Create an event (draft)",
+        "description": "Creates the event in `draft` status and returns the unsigned `create_event` transaction.\n\nNext step: sign `transaction` with the organizer wallet and call `POST /v1/events/{id}/submit`.\nThe price is converted from BRL to payment-token units at creation time.",
+        "operationId": "create_event_v1_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDraft"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/events/{event_id}/transaction": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Re-issue the create_event transaction",
+        "description": "Builds a fresh `create_event` transaction for a draft. Use it after `TX_EXPIRED`\n(the organizer took longer than the blockhash lifetime to sign).",
+        "operationId": "reissue_event_transaction_v1_events__event_id__transaction_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDraft"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/submit": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Publish the event onchain",
+        "description": "Receives the organizer-signed `create_event` transaction, verifies it is exactly the one issued,\nco-signs as fee payer, broadcasts and marks the event `live`. Idempotent once live.",
+        "operationId": "submit_event_v1_events__event_id__submit_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignedTransaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`TX_MISMATCH`: the signed transaction differs from the one issued, or lacks a signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`TX_EXPIRED`: the transaction blockhash expired; fetch a fresh transaction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/events": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "List my events",
+        "description": "Events created by the authenticated organizer, newest first. `sold` is read onchain, so it\nincludes tickets bought through Blinks.",
+        "operationId": "list_my_events_v1_me_events_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventOut"
+                  },
+                  "type": "array",
+                  "title": "Response List My Events V1 Me Events Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/events/{slug}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Get a public event",
+        "description": "Public data for the checkout page. Drafts are not visible (404). `remaining` comes from the\nonchain `sold` counter.",
+        "operationId": "get_public_event_v1_events__slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventPublic"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Create an order (Pix charge)",
+        "description": "Opens an order for a live event and returns its Pix charge (`brcode` + QR). If the same buyer\nalready has an open order for this event and wallet, that order is returned instead (safe on reload).",
+        "operationId": "create_order_route_v1_orders_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SOLD_OUT`: the event has no tickets left",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/orders/{order_id}": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get (and advance) an order",
+        "description": "Poll this every ~2 s from the checkout. Each call advances the order as far as possible:\n`pending_payment → paid → funding → funded`. When `funded`, `transaction` holds the `buy_ticket`\ntransaction to sign; it stays identical for `tx_cache_seconds` so polling never invalidates it.",
+        "operationId": "get_order_route_v1_orders__order_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/{order_id}/submit": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Submit the signed purchase",
+        "description": "Receives the buyer-signed `buy_ticket` transaction, verifies it, co-signs as fee payer and\nbroadcasts. On `TX_EXPIRED`/`TX_STALE` just poll `GET /v1/orders/{id}` again for a fresh\ntransaction. Idempotent once `confirmed`.",
+        "operationId": "submit_order_route_v1_orders__order_id__submit_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignedTransaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`ORDER_NOT_FUNDED`: the order is not ready to be signed (Pix not confirmed yet); `TX_EXPIRED`: the transaction blockhash expired; fetch a fresh transaction; `TX_STALE`: a concurrent purchase took this ticket slot; fetch a fresh transaction; `SOLD_OUT`: the event has no tickets left",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`TX_MISMATCH`: the signed transaction differs from the one issued, or lacks a signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{event_id}/orders": {
+      "get": {
+        "tags": [
+          "Orders",
+          "Events"
+        ],
+        "summary": "List an event's orders",
+        "description": "Orders of an event owned by the authenticated organizer, newest first. No personal data:\nbuyers are identified only by wallet.",
+        "operationId": "list_event_orders_v1_events__event_id__orders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderSummary"
+                  },
+                  "title": "Response List Event Orders V1 Events  Event Id  Orders Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/pix/{provider}": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Pix payment webhook",
+        "description": "Called by the Pix provider when a charge is paid. The body is verified by the provider adapter\n(mock: `X-Pix-Signature` = hex HMAC-SHA256 of the raw body with `PIX_WEBHOOK_SECRET`; body\n`{\"charge_id\": \"...\"}`). Unknown charges are acknowledged so the provider stops retrying.",
+        "operationId": "pix_webhook_v1_webhooks_pix__provider__post",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Provider"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookAck"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tickets/{pubkey}": {
+      "get": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Verify a ticket",
+        "description": "Reads the ticket account onchain. Public: this is what the entry QR points to.",
+        "operationId": "get_ticket_v1_tickets__pubkey__get",
+        "parameters": [
+          {
+            "name": "pubkey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pubkey"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tickets/{pubkey}/checkin": {
+      "post": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Issue a check-in transaction",
+        "description": "For the event organizer at the door. Returns the `check_in` transaction to sign with the\norganizer wallet plus a `checkin_token` to send back on submit.",
+        "operationId": "issue_checkin_v1_tickets__pubkey__checkin_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pubkey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pubkey"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckinTx"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`ALREADY_CHECKED_IN`: the ticket was already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tickets/{pubkey}/checkin/submit": {
+      "post": {
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Submit the signed check-in",
+        "description": "Verifies the organizer-signed `check_in`, co-signs and broadcasts. A second check-in of the\nsame ticket fails onchain with `ALREADY_CHECKED_IN`.",
+        "operationId": "submit_checkin_v1_tickets__pubkey__checkin_submit_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pubkey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pubkey"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckinSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`TX_MISMATCH`: the signed transaction differs from the one issued, or lacks a signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`TX_EXPIRED`: the transaction blockhash expired; fetch a fresh transaction; `ALREADY_CHECKED_IN`: the ticket was already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR`: request body or parameters are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "`RPC_ERROR`: Solana RPC failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actions.json": {
+      "get": {
+        "tags": [
+          "Solana Actions"
+        ],
+        "summary": "Actions rules",
+        "description": "Maps website paths to Action API paths, so Blink clients can discover actions on this domain.",
+        "operationId": "actions_json_actions_json_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionsJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actions/events/{slug}": {
+      "get": {
+        "tags": [
+          "Solana Actions"
+        ],
+        "summary": "Event action metadata",
+        "description": "Solana Actions GET: what a Blink client renders (icon, title, button). Disabled when sold out.",
+        "operationId": "get_event_action_actions_events__slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionGetResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Solana Actions"
+        ],
+        "summary": "Build the purchase transaction for a wallet",
+        "description": "Solana Actions POST: returns `buy_ticket` for `account`, already signed by the API as fee payer.\nOn devnet the same transaction first mints one ticket's worth of mock USDC to the wallet, so any\ndevnet wallet can try the Blink.",
+        "operationId": "post_event_action_actions_events__slug__post",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionPostRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionPostResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Sold out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dev/orders/{order_id}/simulate-payment": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Simulate a Pix payment",
+        "description": "Sandbox only (not mounted when `ENV=production`). Marks the order's Pix as paid; the next\n`GET /v1/orders/{id}` funds the buyer and issues the purchase transaction.",
+        "operationId": "simulate_payment_v1_dev_orders__order_id__simulate_payment_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatedPayment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOT_FOUND`: resource does not exist or does not belong to you",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionError": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ActionError",
+        "examples": [
+          {
+            "message": "Event is sold out"
+          }
+        ]
+      },
+      "ActionGetResponse": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "action",
+            "title": "Type",
+            "default": "action"
+          },
+          "icon": {
+            "type": "string",
+            "title": "Icon"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "disabled": {
+            "type": "boolean",
+            "title": "Disabled",
+            "default": false
+          },
+          "links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActionLinks"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActionError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "icon",
+          "title",
+          "description",
+          "label"
+        ],
+        "title": "ActionGetResponse",
+        "examples": [
+          {
+            "description": "São Paulo, SP · 20/10/2026 22:00 UTC · R$ 20.00",
+            "disabled": false,
+            "icon": "https://pixactions.app/opengraph-image",
+            "label": "Comprar ingresso · 3.64 USDC",
+            "links": {
+              "actions": [
+                {
+                  "href": "/actions/events/meetup-solana-sp-3f9a",
+                  "label": "Comprar ingresso · 3.64 USDC",
+                  "type": "transaction"
+                }
+              ]
+            },
+            "title": "Meetup Solana SP",
+            "type": "action"
+          }
+        ]
+      },
+      "ActionLink": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "transaction",
+            "title": "Type",
+            "default": "transaction"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "href": {
+            "type": "string",
+            "title": "Href"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "href"
+        ],
+        "title": "ActionLink"
+      },
+      "ActionLinks": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ActionLink"
+            },
+            "type": "array",
+            "title": "Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "actions"
+        ],
+        "title": "ActionLinks"
+      },
+      "ActionPostRequest": {
+        "properties": {
+          "account": {
+            "type": "string",
+            "title": "Account",
+            "description": "Wallet that will sign and own the ticket."
+          }
+        },
+        "type": "object",
+        "required": [
+          "account"
+        ],
+        "title": "ActionPostRequest",
+        "examples": [
+          {
+            "account": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+          }
+        ]
+      },
+      "ActionPostResponse": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "transaction",
+            "title": "Type",
+            "default": "transaction"
+          },
+          "transaction": {
+            "type": "string",
+            "title": "Transaction",
+            "description": "Base64 tx, already signed by the API as fee payer."
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction"
+        ],
+        "title": "ActionPostResponse",
+        "examples": [
+          {
+            "message": "Ingresso emitido na Solana!",
+            "transaction": "AgAAAA...==",
+            "type": "transaction"
+          }
+        ]
+      },
+      "ActionRule": {
+        "properties": {
+          "pathPattern": {
+            "type": "string",
+            "title": "Pathpattern"
+          },
+          "apiPath": {
+            "type": "string",
+            "title": "Apipath"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pathPattern",
+          "apiPath"
+        ],
+        "title": "ActionRule"
+      },
+      "ActionsJson": {
+        "properties": {
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/ActionRule"
+            },
+            "type": "array",
+            "title": "Rules"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rules"
+        ],
+        "title": "ActionsJson",
+        "examples": [
+          {
+            "rules": [
+              {
+                "apiPath": "/actions/**",
+                "pathPattern": "/actions/**"
+              }
+            ]
+          }
+        ]
+      },
+      "CheckinSubmit": {
+        "properties": {
+          "transaction": {
+            "type": "string",
+            "title": "Transaction"
+          },
+          "checkin_token": {
+            "type": "string",
+            "title": "Checkin Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction",
+          "checkin_token"
+        ],
+        "title": "CheckinSubmit",
+        "examples": [
+          {
+            "checkin_token": "9f2c...e1.4b7a...0c",
+            "transaction": "AgAAAA...=="
+          }
+        ]
+      },
+      "CheckinTx": {
+        "properties": {
+          "transaction": {
+            "type": "string",
+            "title": "Transaction",
+            "description": "Base64 `check_in` tx for the organizer (check-in authority) to sign."
+          },
+          "checkin_token": {
+            "type": "string",
+            "title": "Checkin Token",
+            "description": "Opaque token binding the issued transaction; send it back on submit."
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction",
+          "checkin_token"
+        ],
+        "title": "CheckinTx",
+        "examples": [
+          {
+            "checkin_token": "9f2c...e1.4b7a...0c",
+            "transaction": "AgAAAA...=="
+          }
+        ]
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode",
+            "description": "Stable, machine-readable error code."
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable explanation."
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details",
+            "description": "Optional structured context."
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "UNAUTHORIZED",
+          "NOT_FOUND",
+          "VALIDATION_ERROR",
+          "SOLD_OUT",
+          "ORDER_NOT_FUNDED",
+          "TX_MISMATCH",
+          "TX_EXPIRED",
+          "TX_STALE",
+          "ALREADY_CHECKED_IN",
+          "RPC_ERROR"
+        ],
+        "title": "ErrorCode"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "examples": [
+          {
+            "error": {
+              "code": "SOLD_OUT",
+              "details": {},
+              "message": "Event is sold out"
+            }
+          }
+        ]
+      },
+      "EventCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 3,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Description",
+            "default": ""
+          },
+          "venue": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Venue",
+            "default": ""
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At",
+            "description": "Start time (ISO 8601). Naive values are treated as UTC."
+          },
+          "price_brl_cents": {
+            "type": "integer",
+            "maximum": 1000000.0,
+            "minimum": 100.0,
+            "title": "Price Brl Cents",
+            "description": "Ticket price in BRL cents."
+          },
+          "capacity": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Capacity"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "wallet": {
+            "type": "string",
+            "title": "Wallet",
+            "description": "Organizer's Solana wallet: signs create_event and check-ins, receives payments.",
+            "examples": [
+              "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "starts_at",
+          "price_brl_cents",
+          "capacity",
+          "wallet"
+        ],
+        "title": "EventCreate",
+        "examples": [
+          {
+            "capacity": 50,
+            "description": "Primeiro meetup da comunidade.",
+            "price_brl_cents": 2000,
+            "starts_at": "2026-10-20T22:00:00Z",
+            "title": "Meetup Solana SP",
+            "venue": "São Paulo, SP",
+            "wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+          }
+        ]
+      },
+      "EventDraft": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/EventOut"
+          },
+          "transaction": {
+            "type": "string",
+            "title": "Transaction",
+            "description": "Base64 `create_event` transaction for the organizer wallet to sign."
+          }
+        },
+        "type": "object",
+        "required": [
+          "event",
+          "transaction"
+        ],
+        "title": "EventDraft",
+        "examples": [
+          {
+            "event": {
+              "capacity": 50,
+              "description": "Primeiro meetup da comunidade.",
+              "id": "4b7f2c1e-8a9d-4f3b-9c2e-1d5a6b7c8d9e",
+              "links": {
+                "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
+                "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+                "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+              },
+              "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+              "organizer_wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
+              "payment_mint": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+              "price_brl_cents": 2000,
+              "price_token": 3636364,
+              "price_token_display": "3.64",
+              "slug": "meetup-solana-sp-3f9a",
+              "sold": 0,
+              "starts_at": "2026-10-20T22:00:00Z",
+              "status": "draft",
+              "title": "Meetup Solana SP",
+              "venue": "São Paulo, SP"
+            },
+            "transaction": "AgAAAA...=="
+          }
+        ]
+      },
+      "EventLinks": {
+        "properties": {
+          "checkout_url": {
+            "type": "string",
+            "title": "Checkout Url",
+            "description": "Pix checkout page to share on WhatsApp."
+          },
+          "action_url": {
+            "type": "string",
+            "title": "Action Url",
+            "description": "Solana Action URL."
+          },
+          "blink_url": {
+            "type": "string",
+            "title": "Blink Url",
+            "description": "dial.to link that renders the action as a Blink."
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkout_url",
+          "action_url",
+          "blink_url"
+        ],
+        "title": "EventLinks"
+      },
+      "EventOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "live"
+            ],
+            "title": "Status"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "venue": {
+            "type": "string",
+            "title": "Venue"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "price_brl_cents": {
+            "type": "integer",
+            "title": "Price Brl Cents"
+          },
+          "price_token": {
+            "type": "integer",
+            "title": "Price Token",
+            "description": "Price in payment-token base units (6 decimals)."
+          },
+          "price_token_display": {
+            "type": "string",
+            "title": "Price Token Display"
+          },
+          "payment_mint": {
+            "type": "string",
+            "title": "Payment Mint"
+          },
+          "capacity": {
+            "type": "integer",
+            "title": "Capacity"
+          },
+          "sold": {
+            "type": "integer",
+            "title": "Sold"
+          },
+          "onchain_pubkey": {
+            "type": "string",
+            "title": "Onchain Pubkey",
+            "description": "Event PDA address."
+          },
+          "organizer_wallet": {
+            "type": "string",
+            "title": "Organizer Wallet"
+          },
+          "links": {
+            "$ref": "#/components/schemas/EventLinks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "status",
+          "title",
+          "description",
+          "venue",
+          "image_url",
+          "starts_at",
+          "price_brl_cents",
+          "price_token",
+          "price_token_display",
+          "payment_mint",
+          "capacity",
+          "sold",
+          "onchain_pubkey",
+          "organizer_wallet",
+          "links"
+        ],
+        "title": "EventOut",
+        "examples": [
+          {
+            "capacity": 50,
+            "description": "Primeiro meetup da comunidade.",
+            "id": "4b7f2c1e-8a9d-4f3b-9c2e-1d5a6b7c8d9e",
+            "links": {
+              "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
+              "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+              "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+            },
+            "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+            "organizer_wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
+            "payment_mint": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+            "price_brl_cents": 2000,
+            "price_token": 3636364,
+            "price_token_display": "3.64",
+            "slug": "meetup-solana-sp-3f9a",
+            "sold": 12,
+            "starts_at": "2026-10-20T22:00:00Z",
+            "status": "live",
+            "title": "Meetup Solana SP",
+            "venue": "São Paulo, SP"
+          }
+        ]
+      },
+      "EventPublic": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "venue": {
+            "type": "string",
+            "title": "Venue"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "price_brl_cents": {
+            "type": "integer",
+            "title": "Price Brl Cents"
+          },
+          "price_token": {
+            "type": "integer",
+            "title": "Price Token"
+          },
+          "price_token_display": {
+            "type": "string",
+            "title": "Price Token Display"
+          },
+          "capacity": {
+            "type": "integer",
+            "title": "Capacity"
+          },
+          "sold": {
+            "type": "integer",
+            "title": "Sold"
+          },
+          "remaining": {
+            "type": "integer",
+            "title": "Remaining"
+          },
+          "sold_out": {
+            "type": "boolean",
+            "title": "Sold Out"
+          },
+          "onchain_pubkey": {
+            "type": "string",
+            "title": "Onchain Pubkey"
+          },
+          "links": {
+            "$ref": "#/components/schemas/EventLinks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "description",
+          "venue",
+          "image_url",
+          "starts_at",
+          "price_brl_cents",
+          "price_token",
+          "price_token_display",
+          "capacity",
+          "sold",
+          "remaining",
+          "sold_out",
+          "onchain_pubkey",
+          "links"
+        ],
+        "title": "EventPublic",
+        "examples": [
+          {
+            "capacity": 50,
+            "description": "Primeiro meetup da comunidade.",
+            "links": {
+              "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
+              "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+              "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+            },
+            "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+            "price_brl_cents": 2000,
+            "price_token": 3636364,
+            "price_token_display": "3.64",
+            "remaining": 38,
+            "slug": "meetup-solana-sp-3f9a",
+            "sold": 12,
+            "sold_out": false,
+            "starts_at": "2026-10-20T22:00:00Z",
+            "title": "Meetup Solana SP",
+            "venue": "São Paulo, SP"
+          }
+        ]
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "env": {
+            "type": "string",
+            "title": "Env"
+          },
+          "cluster": {
+            "type": "string",
+            "title": "Cluster"
+          },
+          "program_id": {
+            "type": "string",
+            "title": "Program Id"
+          },
+          "service_wallet": {
+            "type": "string",
+            "title": "Service Wallet"
+          },
+          "payment_mint": {
+            "type": "string",
+            "title": "Payment Mint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "env",
+          "cluster",
+          "program_id",
+          "service_wallet",
+          "payment_mint"
+        ],
+        "title": "HealthOut",
+        "examples": [
+          {
+            "cluster": "devnet",
+            "env": "production",
+            "payment_mint": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+            "program_id": "PiXAct1ons1111111111111111111111111111111111",
+            "service_wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+            "status": "ok",
+            "version": "0.1.0"
+          }
+        ]
+      },
+      "OrderCreate": {
+        "properties": {
+          "event_slug": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Event Slug"
+          },
+          "wallet": {
+            "type": "string",
+            "title": "Wallet",
+            "description": "Buyer's embedded wallet; receives the stablecoins and the ticket.",
+            "examples": [
+              "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_slug",
+          "wallet"
+        ],
+        "title": "OrderCreate",
+        "examples": [
+          {
+            "event_slug": "meetup-solana-sp-3f9a",
+            "wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+          }
+        ]
+      },
+      "OrderOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "paid",
+              "funding",
+              "funded",
+              "confirmed",
+              "failed",
+              "expired"
+            ],
+            "title": "Status"
+          },
+          "event_slug": {
+            "type": "string",
+            "title": "Event Slug"
+          },
+          "amount_brl_cents": {
+            "type": "integer",
+            "title": "Amount Brl Cents"
+          },
+          "amount_token": {
+            "type": "integer",
+            "title": "Amount Token"
+          },
+          "pix": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PixChargeOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Present while `pending_payment`."
+          },
+          "transaction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaction",
+            "description": "Base64 `buy_ticket` tx to sign; present when `funded`."
+          },
+          "ticket": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TicketRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Present when `confirmed`."
+          },
+          "funding_tx_sig": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Funding Tx Sig"
+          },
+          "buy_tx_sig": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buy Tx Sig"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "event_slug",
+          "amount_brl_cents",
+          "amount_token",
+          "pix",
+          "transaction",
+          "ticket",
+          "funding_tx_sig",
+          "buy_tx_sig",
+          "error",
+          "created_at"
+        ],
+        "title": "OrderOut",
+        "examples": [
+          {
+            "amount_brl_cents": 2000,
+            "amount_token": 3636364,
+            "created_at": "2026-10-10T18:00:00Z",
+            "event_slug": "meetup-solana-sp-3f9a",
+            "id": "c0ffee00-1111-4222-8333-444455556666",
+            "pix": {
+              "brcode": "00020101021226...6304ABCD",
+              "charge_id": "MOCKC0FFEE001111422283",
+              "expires_at": "2026-10-10T18:15:00Z",
+              "provider": "mock",
+              "qr_png_base64": "iVBORw0KGgoAAAANSUhEUg..."
+            },
+            "status": "pending_payment"
+          },
+          {
+            "amount_brl_cents": 2000,
+            "amount_token": 3636364,
+            "created_at": "2026-10-10T18:00:00Z",
+            "event_slug": "meetup-solana-sp-3f9a",
+            "funding_tx_sig": "5xTq...9Kd",
+            "id": "c0ffee00-1111-4222-8333-444455556666",
+            "status": "funded",
+            "transaction": "AgAAAA...=="
+          },
+          {
+            "amount_brl_cents": 2000,
+            "amount_token": 3636364,
+            "buy_tx_sig": "3Hn2...pQ1",
+            "created_at": "2026-10-10T18:00:00Z",
+            "event_slug": "meetup-solana-sp-3f9a",
+            "funding_tx_sig": "5xTq...9Kd",
+            "id": "c0ffee00-1111-4222-8333-444455556666",
+            "status": "confirmed",
+            "ticket": {
+              "explorer_url": "https://explorer.solana.com/address/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj?cluster=devnet",
+              "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+              "url": "https://pixactions.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+            }
+          }
+        ]
+      },
+      "OrderSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "paid",
+              "funding",
+              "funded",
+              "confirmed",
+              "failed",
+              "expired"
+            ],
+            "title": "Status"
+          },
+          "buyer_wallet": {
+            "type": "string",
+            "title": "Buyer Wallet"
+          },
+          "amount_brl_cents": {
+            "type": "integer",
+            "title": "Amount Brl Cents"
+          },
+          "ticket_pubkey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Pubkey"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "buyer_wallet",
+          "amount_brl_cents",
+          "ticket_pubkey",
+          "created_at"
+        ],
+        "title": "OrderSummary",
+        "examples": [
+          {
+            "amount_brl_cents": 2000,
+            "buyer_wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
+            "created_at": "2026-10-10T18:00:00Z",
+            "id": "c0ffee00-1111-4222-8333-444455556666",
+            "status": "confirmed",
+            "ticket_pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+          }
+        ]
+      },
+      "PixChargeOut": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "charge_id": {
+            "type": "string",
+            "title": "Charge Id"
+          },
+          "brcode": {
+            "type": "string",
+            "title": "Brcode",
+            "description": "Pix 'copia e cola' payload."
+          },
+          "qr_png_base64": {
+            "type": "string",
+            "title": "Qr Png Base64",
+            "description": "QR code of `brcode`, PNG, base64."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider",
+          "charge_id",
+          "brcode",
+          "qr_png_base64",
+          "expires_at"
+        ],
+        "title": "PixChargeOut"
+      },
+      "SignedTransaction": {
+        "properties": {
+          "transaction": {
+            "type": "string",
+            "title": "Transaction",
+            "description": "Base64 Solana transaction previously issued by the API, now signed by the user's wallet."
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction"
+        ],
+        "title": "SignedTransaction",
+        "examples": [
+          {
+            "transaction": "AgAAAAAAAAAAAAAAAAAA...=="
+          }
+        ]
+      },
+      "SimulatedPayment": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "pix_paid_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Pix Paid At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "pix_paid_at"
+        ],
+        "title": "SimulatedPayment",
+        "examples": [
+          {
+            "order_id": "c0ffee00-1111-4222-8333-444455556666",
+            "pix_paid_at": "2026-10-10T18:00:08Z"
+          }
+        ]
+      },
+      "TicketEvent": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "venue": {
+            "type": "string",
+            "title": "Venue"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "venue",
+          "starts_at"
+        ],
+        "title": "TicketEvent"
+      },
+      "TicketOut": {
+        "properties": {
+          "pubkey": {
+            "type": "string",
+            "title": "Pubkey"
+          },
+          "serial": {
+            "type": "integer",
+            "title": "Serial",
+            "description": "Ticket number within the event (0-based)."
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "checked_in": {
+            "type": "boolean",
+            "title": "Checked In"
+          },
+          "event": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TicketEvent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "explorer_url": {
+            "type": "string",
+            "title": "Explorer Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pubkey",
+          "serial",
+          "owner",
+          "checked_in",
+          "event",
+          "url",
+          "explorer_url"
+        ],
+        "title": "TicketOut",
+        "examples": [
+          {
+            "checked_in": false,
+            "event": {
+              "slug": "meetup-solana-sp-3f9a",
+              "starts_at": "2026-10-20T22:00:00Z",
+              "title": "Meetup Solana SP",
+              "venue": "São Paulo, SP"
+            },
+            "explorer_url": "https://explorer.solana.com/address/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj?cluster=devnet",
+            "owner": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
+            "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+            "serial": 4,
+            "url": "https://pixactions.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+          }
+        ]
+      },
+      "TicketRef": {
+        "properties": {
+          "pubkey": {
+            "type": "string",
+            "title": "Pubkey",
+            "description": "Ticket PDA address."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "Public verification page (encode this in the entry QR)."
+          },
+          "explorer_url": {
+            "type": "string",
+            "title": "Explorer Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pubkey",
+          "url",
+          "explorer_url"
+        ],
+        "title": "TicketRef"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WaitlistIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "organizer",
+              "buyer",
+              "developer"
+            ],
+            "title": "Role",
+            "description": "Who is signing up."
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "pt",
+              "en"
+            ],
+            "title": "Lang",
+            "default": "pt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "role"
+        ],
+        "title": "WaitlistIn",
+        "examples": [
+          {
+            "email": "ana@example.com",
+            "lang": "pt",
+            "role": "organizer"
+          }
+        ]
+      },
+      "WaitlistOut": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "organizer",
+              "buyer",
+              "developer"
+            ],
+            "title": "Role"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created",
+            "description": "False when the email was already on the list."
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "role",
+          "created"
+        ],
+        "title": "WaitlistOut",
+        "examples": [
+          {
+            "created": true,
+            "email": "ana@example.com",
+            "role": "organizer"
+          }
+        ]
+      },
+      "WebhookAck": {
+        "properties": {
+          "received": {
+            "type": "boolean",
+            "title": "Received"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id",
+            "description": "Matched order, or null when the charge is unknown."
+          }
+        },
+        "type": "object",
+        "required": [
+          "received",
+          "order_id"
+        ],
+        "title": "WebhookAck",
+        "examples": [
+          {
+            "order_id": "c0ffee00-1111-4222-8333-444455556666",
+            "received": true
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "description": "Privy access token, from `getAccessToken()` in the Privy SDK.",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Service status and the onchain configuration in use."
+    },
+    {
+      "name": "Waitlist",
+      "description": "Landing page waitlist."
+    },
+    {
+      "name": "Events",
+      "description": "Organizer events: create, publish onchain, list."
+    },
+    {
+      "name": "Orders",
+      "description": "Buyer checkout: Pix charge → onchain funding → signed purchase."
+    },
+    {
+      "name": "Tickets",
+      "description": "Ticket verification and onchain check-in."
+    },
+    {
+      "name": "Solana Actions",
+      "description": "Spec-compliant Actions so any event is also a Blink."
+    },
+    {
+      "name": "Webhooks",
+      "description": "Pix provider callbacks."
+    },
+    {
+      "name": "Dev",
+      "description": "Sandbox helpers, disabled in production."
+    }
+  ]
+}
