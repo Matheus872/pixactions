@@ -3,6 +3,7 @@ from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import Request
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool, StaticPool
@@ -40,14 +41,23 @@ def make_engine(url: str) -> AsyncEngine:
 async def init_db(engine: AsyncEngine) -> None:
     from . import models  # noqa: F401  (registers tables on Base.metadata)
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except DBAPIError as exc:
+        # Another instance (serverless cold start) created the tables between check and create.
+        if "already exists" not in str(exc).lower():
+            raise
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
     state = request.app.state
     if not state.db_ready:
-        await init_db(state.engine)
-        state.db_ready = True
+        async with state.db_lock:  # concurrent first requests: create tables once
+            if not state.db_ready:
+                await init_db(state.engine)
+                state.db_ready = True
     async with state.sessionmaker() as session:
         yield session

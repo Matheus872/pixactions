@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from scalar_fastapi import get_scalar_api_reference
@@ -42,6 +44,7 @@ def create_app(
     app.state.engine = engine
     app.state.sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
     app.state.db_ready = False
+    app.state.db_lock = asyncio.Lock()
     app.state.gateway = gateway or RpcSolanaGateway(settings.solana_rpc_url)
     app.state.pix = pix or MockPixProvider(settings)
     app.state.service = (
