@@ -23,7 +23,7 @@ The token is a JWT signed with ES256. The API checks:
 
 | Claim | Expected |
 |---|---|
-| signature | valid for the app's Privy verification key (`PRIVY_VERIFICATION_KEY`) |
+| signature | valid for one of the app's published keys (JWKS at `https://auth.privy.io/api/v1/apps/<app id>/jwks.json`, chosen by the token's `kid`); a fixed PEM in `PRIVY_VERIFICATION_KEY` overrides it |
 | `iss` | `privy.io` |
 | `aud` | the Privy app id (`PRIVY_APP_ID`) |
 | `exp` | in the future |

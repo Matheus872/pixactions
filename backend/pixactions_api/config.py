@@ -28,6 +28,10 @@ class Settings(BaseSettings):
         return self.env == "production"
 
     @property
+    def privy_jwks_url(self) -> str:
+        return f"https://auth.privy.io/api/v1/apps/{self.privy_app_id}/jwks.json"
+
+    @property
     def privy_key_pem(self) -> str:
         return self.privy_verification_key.replace("\\n", "\n")
 

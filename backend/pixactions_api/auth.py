@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Annotated
 
 import jwt
@@ -19,6 +20,19 @@ _bearer = HTTPBearer(
 )
 
 
+@lru_cache(maxsize=4)
+def _jwks_client(url: str) -> jwt.PyJWKClient:
+    """Cached JWKS client: Privy publishes the app's signing keys and rotates them."""
+    return jwt.PyJWKClient(url, cache_keys=True, lifespan=3600)
+
+
+def _verification_key(token: str, settings) -> object:
+    """A configured PEM wins (tests, pinned key); otherwise pick the published key by the token's kid."""
+    if settings.privy_verification_key.strip():
+        return settings.privy_key_pem
+    return _jwks_client(settings.privy_jwks_url).get_signing_key_from_jwt(token).key
+
+
 async def current_user(
     request: Request,
     creds: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
@@ -29,7 +43,7 @@ async def current_user(
     try:
         claims = jwt.decode(
             creds.credentials,
-            settings.privy_key_pem,
+            _verification_key(creds.credentials, settings),
             algorithms=["ES256"],
             audience=settings.privy_app_id,
             issuer="privy.io",
