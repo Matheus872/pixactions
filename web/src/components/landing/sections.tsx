@@ -40,7 +40,7 @@ export function Hero({ t, heroImage }: { t: LandingCopy; heroImage: React.ReactN
       <div className={`${wrap} grid items-center gap-12 py-20 md:grid-cols-2 md:py-28`}>
         <div className="space-y-6">
           <span className="inline-block rounded-full bg-neon-soft px-3 py-1 font-mono text-xs text-neon-ink">{t.hero.badge}</span>
-          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
+          <h1 className="text-balance text-4xl font-extrabold leading-[1.05] tracking-tight md:text-5xl xl:text-[3.5rem]">
             {t.hero.title} <span className="text-neon-ink">{t.hero.accent}</span>
           </h1>
           <p className="max-w-xl text-lg text-muted">{t.hero.subtitle}</p>
