@@ -14,3 +14,6 @@ __pycache__/
 !.env.example
 *-keypair.json
 id.json
+
+# superpowers scratch
+.superpowers/
