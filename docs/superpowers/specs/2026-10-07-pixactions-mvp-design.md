@@ -232,3 +232,18 @@ qualquer estado ──(erro)──► failed     pending_payment ──(expirou)
 | **10/out** | Painel, check-in, Actions, documentação da API, landing com a identidade do Higgsfield, deploy |
 | **11/out** | Acabamento, compras de teste reais, README, gravação do pitch e do vídeo técnico |
 | **12/out** | Folga e submissão; Trilha Brasil no Superteam Earn |
+
+## 10. Ajustes feitos no plano de implementação (08/out)
+
+Quando esta seção diverge das anteriores, ela prevalece.
+
+- **Pasta do programa:** `onchain/` (workspace Anchor), em vez de `programs/` na raiz, para não misturar com a web.
+- **Testes do programa:** `anchor test` com TypeScript/mocha, o padrão do Anchor, em vez de LiteSVM. É mais confiável instalar no prazo.
+- **Banco:** as tabelas são criadas no primeiro acesso (`create_all`), sem Alembic. No MVP não há migrações.
+- **Carteira do usuário:** não consultamos a API da Privy para conferir carteiras vinculadas. A posse é provada pela assinatura on-chain do próprio usuário na transação.
+- **Check-in:** a transação é vinculada por um `checkin_token` (HMAC do hash da mensagem), sem gravar estado no banco.
+- **Códigos de erro:** entra `TX_STALE` (compra concorrente pegou o mesmo número de ingresso; o cliente só busca a transação de novo). Sai `EVENT_NOT_LIVE` (rascunho é `NOT_FOUND`). Entra o estado de pedido `funding`, que impede o mint em dobro.
+- **Webhook simulado:** cabeçalho `X-Pix-Signature` = HMAC-SHA256 do corpo com `PIX_WEBHOOK_SECRET`.
+- **CORS:** `*`. A API usa Bearer token, sem cookies, e as Solana Actions exigem isso. A variável `CORS_ORIGINS` sai.
+- **Ambiente publicado:** `ENV=demo`. Mantém o sandbox de Pix e o faucet de mock USDC do Blink na devnet. `production` desliga os dois.
+- **Imagem Open Graph:** gerada por código (`/opengraph-image`), também usada como ícone das Actions. O Higgsfield cuida de logo, hero e ilustrações.
