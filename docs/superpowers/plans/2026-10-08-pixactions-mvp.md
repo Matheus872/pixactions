@@ -16,6 +16,7 @@
 
 ## Global Constraints
 
+- Commits: Conventional Commits, só no nome do usuário (sem trailer de co-autoria). README sem travessão.
 - Prazo de submissão: **12/out/2026 23h59 PT (13/out 3h59 BRT)**. O fluxo de ponta a ponta tem prioridade sobre landing, check-in e Actions.
 - Cluster: **devnet**. Moeda da demo: mock de USDC (mint próprio, **6 decimais**), configurável por evento (`payment_mint`).
 - Taxa da plataforma: `fee_bps = 100` (1%), máximo `1000`. `fee = price * fee_bps / 10_000`, arredondado para baixo.
@@ -257,9 +258,7 @@ License: MIT
 
 ```bash
 cd /home/matheus/dev/projetos/pixactions
-git add -A && git commit -m "chore: scaffold onchain, backend e web
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add -A && git commit -m "chore: scaffold onchain, backend e web"
 ```
 
 ---
@@ -716,9 +715,7 @@ Expected: 9 passing.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add onchain && git commit -m "feat(onchain): programa de eventos, ingressos e check-in
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add onchain && git commit -m "feat(onchain): programa de eventos, ingressos e check-in"
 ```
 
 ---
@@ -756,9 +753,7 @@ Expected: o id do programa e `['buy_ticket', 'check_in', 'create_event', 'initia
 - [ ] **Step 3: Commit**
 
 ```bash
-git add onchain/Anchor.toml backend/pixactions_api/solana && git commit -m "feat(onchain): deploy na devnet e IDL para o backend
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add onchain/Anchor.toml backend/pixactions_api/solana && git commit -m "feat(onchain): deploy na devnet e IDL para o backend"
 ```
 
 ---
@@ -1597,9 +1592,7 @@ Expected: todos passam; ruff limpo. Se algum nome da API do `solders` divergir n
 - [ ] **Step 6: Commit**
 
 ```bash
-git add backend && git commit -m "feat(backend): config, erros, preço e cliente Solana do programa
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add backend && git commit -m "feat(backend): config, erros, preço e cliente Solana do programa"
 ```
 
 ---
@@ -2447,9 +2440,7 @@ Expected: JSON com `"status":"ok"` e `200`.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add backend && git commit -m "feat(backend): app FastAPI, banco, Pix simulado, health, docs e lista de espera
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add backend && git commit -m "feat(backend): app FastAPI, banco, Pix simulado, health, docs e lista de espera"
 ```
 
 ---
@@ -3135,9 +3126,7 @@ Expected: todos passam.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add backend && git commit -m "feat(backend): auth Privy e eventos (rascunho, publicação on-chain, público)
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add backend && git commit -m "feat(backend): auth Privy e eventos (rascunho, publicação on-chain, público)"
 ```
 
 ---
@@ -3902,9 +3891,7 @@ Expected: todos passam.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend && git commit -m "feat(backend): pedidos com Pix simulado, on-ramp simulado e compra assinada
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add backend && git commit -m "feat(backend): pedidos com Pix simulado, on-ramp simulado e compra assinada"
 ```
 
 ---
@@ -4477,9 +4464,7 @@ Expected: todos passam.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend && git commit -m "feat(backend): verificação e check-in de ingressos, Solana Actions
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add backend && git commit -m "feat(backend): verificação e check-in de ingressos, Solana Actions"
 ```
 
 ---
@@ -4786,9 +4771,7 @@ Run: `cd backend && uv run pytest -q && uv run ruff check .`
 Expected: todos passam.
 
 ```bash
-git add backend docs/api && git commit -m "docs(api): guias, OpenAPI exportado, bootstrap e smoke na devnet
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add backend docs/api && git commit -m "docs(api): guias, OpenAPI exportado, bootstrap e smoke na devnet"
 ```
 
 ---
@@ -5402,9 +5385,7 @@ Antes, confirme que `PRIVY_VERIFICATION_KEY` está no `backend/.env` (Privy Dash
 
 ```bash
 cd web && npm run lint && npm test && npm run build
-git add web && git commit -m "feat(web): fundação, Privy, cliente da API e criação de evento
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add web && git commit -m "feat(web): fundação, Privy, cliente da API e criação de evento"
 ```
 
 ---
@@ -5684,9 +5665,7 @@ Expected: tudo funciona sem nenhum prompt de carteira além do login.
 
 ```bash
 cd web && npm run lint && npm run build
-git add web && git commit -m "feat(web): checkout Pix e página pública do ingresso
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add web && git commit -m "feat(web): checkout Pix e página pública do ingresso"
 ```
 
 ---
@@ -5926,9 +5905,7 @@ Expected: "✓ Entrada liberada". Escaneie de novo (depois de "Próximo"): "✗ 
 
 ```bash
 cd web && npm run lint && npm run build
-git add web && git commit -m "feat(web): gestão do evento e check-in on-chain por QR
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add web && git commit -m "feat(web): gestão do evento e check-in on-chain por QR"
 ```
 
 ---
@@ -6484,9 +6461,7 @@ Rode `npm run dev` e confira `/` em 1440 px e em 375 px (DevTools): sem rolagem 
 ```bash
 cd web && npm run lint && npm run build
 cd ../backend && uv run pytest -q
-cd .. && git add web backend && git commit -m "feat(web): identidade visual e landing PT/EN com lista de espera
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+cd .. && git add web backend && git commit -m "feat(web): identidade visual e landing PT/EN com lista de espera"
 ```
 
 ---
@@ -6582,8 +6557,6 @@ Anote qualquer falha e corrija antes de seguir.
 - [ ] **Step 7: Commit e push**
 
 ```bash
-git add -A && git commit -m "docs: README final e configuração de deploy
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git add -A && git commit -m "docs: README final e configuração de deploy"
 git push
 ```
