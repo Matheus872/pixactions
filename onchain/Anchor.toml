@@ -16,3 +16,6 @@ wallet = "~/.config/solana/id.json"
 test = "npx ts-mocha -p ./tsconfig.json -t 1000000 \"tests/**/*.ts\""
 
 [hooks]
+
+[programs.devnet]
+pixactions = "DZ5ddra1TXhkbS9ZBnimtZPVeTxoXmxbCGvFHJqKVPa9"
