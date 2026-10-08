@@ -11,7 +11,7 @@ from .docs_meta import API_DESCRIPTION, TAGS
 from .errors import install_error_handlers
 from .pix.base import PixProvider
 from .pix.mock import MockPixProvider
-from .routers import dev, events, health, orders, waitlist, webhooks
+from .routers import actions, dev, events, health, orders, tickets, waitlist, webhooks
 from .solana.gateway import RpcSolanaGateway, SolanaGateway
 
 ACTION_HEADERS = [
@@ -56,7 +56,8 @@ def create_app(
         expose_headers=["X-Action-Version", "X-Blockchain-Ids"],
     )
     install_error_handlers(app)
-    for router in (health.router, waitlist.router, events.router, orders.router, webhooks.router):
+    for router in (health.router, waitlist.router, events.router, orders.router, webhooks.router,
+                   tickets.router, actions.router):
         app.include_router(router)
     if not settings.is_production:
         app.include_router(dev.router)

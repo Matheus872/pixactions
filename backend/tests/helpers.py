@@ -3,7 +3,8 @@ from solders.keypair import Keypair
 from solders.pubkey import Pubkey
 from solders.transaction import Transaction
 
-from pixactions_api.solana.accounts import EventAccount, encode_event
+from pixactions_api.solana.accounts import EventAccount, TicketAccount, encode_event, encode_ticket
+from pixactions_api.solana.pda import ticket_pda
 from pixactions_api.solana.tx import tx_from_b64, tx_to_b64
 
 
@@ -79,3 +80,12 @@ def seed_event_account(gateway, event: dict, *, sold: int = 0, capacity: int | N
             bump=255,
         )
     )
+
+
+def seed_ticket(gateway, event: dict, *, serial: int = 0, owner=None, checked_in: bool = False) -> str:
+    event_pk = Pubkey.from_string(event["onchain_pubkey"])
+    pk = ticket_pda(event_pk, serial)
+    gateway.accounts[str(pk)] = encode_ticket(
+        TicketAccount(event_pk, owner or Keypair().pubkey(), serial, checked_in, 255)
+    )
+    return str(pk)
