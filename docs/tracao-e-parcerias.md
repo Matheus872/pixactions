@@ -41,5 +41,5 @@ Meta: 10 respostas. Os números delas vão para o pitch.
 
 - Pitch de até 3 minutos, em inglês.
 - Vídeo técnico de 2 a 3 minutos, em inglês: stack, arquitetura e por que Solana.
-- Repositório GitHub: decidir entre público ou privado com acesso aos jurados. Se for privado, conferir que os jurados têm acesso (esquecer disso é erro comum, segundo o Colosseum).
+- Repositório GitHub público (MIT). Concorre também ao prêmio Public Good.
 - Inscrição na Trilha Brasil, no Superteam Earn.

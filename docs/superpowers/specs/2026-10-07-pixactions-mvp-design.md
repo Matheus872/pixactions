@@ -2,7 +2,7 @@
 
 - **Data:** 07/out/2026
 - **Autor:** Matheus, com Claude
-- **Status:** aprovado em conversa; aguardando revisão da spec escrita
+- **Status:** aprovado (08/out/2026)
 - **Prazo de submissão:** 12/out/2026 às 23h59 PT (13/out às 3h59 em Brasília)
 
 ## 1. Objetivo
@@ -19,7 +19,7 @@ O primeiro caso de uso são **ingressos de eventos**. O mesmo evento também é 
 2. A demo nunca quebra: o Pix simulado é determinístico.
 3. A landing page está publicada e capta inscrições na lista de espera (métrica de tração).
 4. A API tem documentação de referência (OpenAPI) mais guias de fluxo.
-5. O repositório GitHub tem README e os jurados conseguem acessá-lo. Fica privado durante o desenvolvimento; a visibilidade (público ou privado com acesso aos jurados) é decidida na submissão.
+5. O repositório GitHub é público (open-source, licença MIT), com README, para o vídeo técnico e para concorrer ao prêmio Public Good.
 
 ### Fora de escopo (roadmap do pitch)
 
@@ -206,7 +206,7 @@ qualquer estado ──(erro)──► failed     pending_payment ──(expirou)
 
 ## 7. Configuração e deploy
 
-- **Contas do usuário:** Privy (App ID e chave de verificação), Neon (`DATABASE_URL`), Vercel (dois projetos: `web` e `backend`) e GitHub (repositório privado por enquanto).
+- **Contas do usuário:** Privy (App ID e chave de verificação), Neon (`DATABASE_URL`), Vercel (dois projetos: `web` e `backend`) e GitHub (repositório público, MIT).
 - **Variáveis do backend:** `DATABASE_URL`, `SOLANA_RPC_URL`, `PROGRAM_ID`, `SERVICE_KEYPAIR` (base58; fee payer, autoridade do mock de USDC e admin), `MOCK_USDC_MINT`, `PRIVY_APP_ID`, `PRIVY_APP_SECRET`, `PRIVY_VERIFICATION_KEY`, `MOCK_PIX_AUTOPAY_SECONDS`, `MOCK_BRL_PER_USD`, `ENV`, `CORS_ORIGINS`, `PUBLIC_WEB_URL`.
 - **Variáveis da web:** `NEXT_PUBLIC_PRIVY_APP_ID`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SOLANA_CLUSTER`.
 - **Scripts:** `scripts/bootstrap_devnet.py` cria o mock de USDC, inicializa o `Config` e financia a carteira de serviço via airdrop.
