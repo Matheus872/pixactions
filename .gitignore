@@ -1,0 +1,16 @@
+# deps / builds
+node_modules/
+.next/
+target/
+.anchor/
+__pycache__/
+.venv/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+# env / keys
+.env
+.env.*
+!.env.example
+*-keypair.json
+id.json
