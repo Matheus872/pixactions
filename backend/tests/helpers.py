@@ -3,6 +3,7 @@ from solders.keypair import Keypair
 from solders.pubkey import Pubkey
 from solders.transaction import Transaction
 
+from pixactions_api.solana.accounts import EventAccount, encode_event
 from pixactions_api.solana.tx import tx_from_b64, tx_to_b64
 
 
@@ -45,3 +46,36 @@ def sent_to_program(gateway: FakeSolanaGateway, program_id: Pubkey) -> list[Tran
         if any(keys[ix.program_id_index] == program_id for ix in tx.message.instructions):
             out.append(tx)
     return out
+
+
+async def create_draft(client, auth, organizer: Keypair, **overrides) -> dict:
+    body = {
+        "title": "Meetup Solana SP",
+        "description": "Primeiro meetup",
+        "venue": "São Paulo, SP",
+        "starts_at": "2026-10-20T22:00:00Z",
+        "price_brl_cents": 2000,
+        "capacity": 50,
+        "wallet": str(organizer.pubkey()),
+    } | overrides
+    r = await client.post("/v1/events", json=body, headers=auth())
+    assert r.status_code == 201, r.text
+    return r.json()
+
+
+def seed_event_account(gateway, event: dict, *, sold: int = 0, capacity: int | None = None) -> None:
+    """Pretend the Event PDA exists onchain with the given counters."""
+    organizer = Pubkey.from_string(event["organizer_wallet"])
+    gateway.accounts[event["onchain_pubkey"]] = encode_event(
+        EventAccount(
+            organizer=organizer,
+            event_id=0,
+            payment_mint=Pubkey.from_string(event["payment_mint"]),
+            price=event["price_token"],
+            capacity=capacity if capacity is not None else event["capacity"],
+            sold=sold,
+            starts_at=0,
+            checkin_authority=organizer,
+            bump=255,
+        )
+    )

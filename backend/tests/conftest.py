@@ -5,12 +5,12 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from httpx import ASGITransport, AsyncClient
-from pixactions_api.main import create_app
-from pixactions_api.pix.mock import MockPixProvider
 from solders.keypair import Keypair
 
 from pixactions_api.config import Settings
-from tests.helpers import FakeSolanaGateway
+from pixactions_api.main import create_app
+from pixactions_api.pix.mock import MockPixProvider
+from tests.helpers import FakeSolanaGateway, create_draft, seed_event_account, sign_b64
 
 
 @pytest.fixture
@@ -68,3 +68,15 @@ def auth(privy_keys, settings):
         return {"Authorization": f"Bearer {jwt.encode(claims, privy_keys[0], algorithm='ES256')}"}
 
     return make
+
+
+@pytest.fixture
+async def live_event(client, auth, gateway):
+    organizer = Keypair()
+    draft = await create_draft(client, auth, organizer)
+    signed = sign_b64(draft["transaction"], organizer)
+    r = await client.post(f"/v1/events/{draft['event']['id']}/submit", json={"transaction": signed}, headers=auth())
+    assert r.status_code == 200, r.text
+    event = r.json()
+    seed_event_account(gateway, event)
+    return {"event": event, "organizer": organizer}

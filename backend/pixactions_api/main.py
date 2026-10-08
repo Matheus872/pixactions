@@ -11,7 +11,7 @@ from .docs_meta import API_DESCRIPTION, TAGS
 from .errors import install_error_handlers
 from .pix.base import PixProvider
 from .pix.mock import MockPixProvider
-from .routers import health, waitlist
+from .routers import events, health, waitlist
 from .solana.gateway import RpcSolanaGateway, SolanaGateway
 
 ACTION_HEADERS = [
@@ -56,7 +56,7 @@ def create_app(
         expose_headers=["X-Action-Version", "X-Blockchain-Ids"],
     )
     install_error_handlers(app)
-    for router in (health.router, waitlist.router):
+    for router in (health.router, waitlist.router, events.router):
         app.include_router(router)
 
     @app.get("/docs", include_in_schema=False)
