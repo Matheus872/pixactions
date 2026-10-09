@@ -7,8 +7,9 @@ stop_port() {
   for pid in $(ss -ltnpH "sport = :$1" 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u); do kill "$pid" 2>/dev/null; done
 }
 
-pkill -f "scripts/dev-watchdog.sh" 2>/dev/null
-pkill -f "solana-test-validator --reset" 2>/dev/null
+# Casa pelo executável/argv exato, nunca por texto solto (evita matar shells que só mencionam o nome).
+pkill -f "^bash [^ ]*scripts/dev-watchdog\.sh$" 2>/dev/null
+pkill -x solana-test-val 2>/dev/null
 stop_port 8001
 stop_port 3000
 sleep 2

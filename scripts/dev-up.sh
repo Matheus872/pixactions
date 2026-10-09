@@ -31,9 +31,9 @@ if ! solana -u localhost cluster-version >/dev/null 2>&1; then
     >"$LOGS/validator.log" 2>&1 </dev/null
 fi
 wait_for "validador em http://127.0.0.1:8899" solana -u localhost cluster-version
-pgrep -f "scripts/dev-watchdog.sh" >/dev/null || \
+pgrep -f "^bash [^ ]*scripts/dev-watchdog\.sh$" >/dev/null || \
   setsid -f "$ROOT/scripts/dev-watchdog.sh" >>"$LOGS/watchdog.log" 2>&1 </dev/null
-echo "  ✓ watchdog de memória ativo (derruba o validador acima de 1,2 GB ou com pouca memória livre)"
+echo "  ✓ watchdog de memória ativo (derruba o validador se a memória livre cair abaixo de 700 MB)"
 
 echo "2/4 carteira de serviço e USDC de teste"
 if [ "$FRESH" = 1 ]; then
