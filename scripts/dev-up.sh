@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sobe o ambiente local completo: validador Solana (com o programa), API (porta 8001) e web (porta 3000).
-# Uso: ./scripts/dev-up.sh        Logs em /tmp/pixactions-dev/
+# Uso: ./scripts/dev-up.sh        Logs em /tmp/pixactions-dev/   Para desligar: ./scripts/dev-down.sh
 # O validador começa do zero a cada execução; a carteira de serviço e o mint de teste da localnet
 # são recriados e gravados em backend/.env (apenas quando SOLANA_RPC_URL aponta para 127.0.0.1).
 set -euo pipefail
@@ -31,6 +31,9 @@ if ! solana -u localhost cluster-version >/dev/null 2>&1; then
     >"$LOGS/validator.log" 2>&1 </dev/null
 fi
 wait_for "validador em http://127.0.0.1:8899" solana -u localhost cluster-version
+pgrep -f "scripts/dev-watchdog.sh" >/dev/null || \
+  setsid -f "$ROOT/scripts/dev-watchdog.sh" >>"$LOGS/watchdog.log" 2>&1 </dev/null
+echo "  ✓ watchdog de memória ativo (derruba o validador acima de 1,2 GB ou com pouca memória livre)"
 
 echo "2/4 carteira de serviço e USDC de teste"
 if [ "$FRESH" = 1 ]; then
@@ -70,3 +73,4 @@ fi
 wait_for "web em http://localhost:3000" curl -sf -m 60 -o /dev/null localhost:3000/dashboard
 
 echo "Pronto: abra http://localhost:3000/dashboard"
+echo "Ao terminar de testar, rode ./scripts/dev-down.sh (o validador consome memória enquanto está ligado)."
