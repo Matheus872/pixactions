@@ -38,7 +38,7 @@ curl:
 ```bash
 BODY='{"charge_id":"MOCKC0FFEE001111422283"}'
 SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$PIX_WEBHOOK_SECRET" | cut -d' ' -f2)
-curl -X POST https://api.pixactions.app/v1/webhooks/pix/mock \
+curl -X POST https://pixactions-api.vercel.app/v1/webhooks/pix/mock \
   -H "Content-Type: application/json" -H "X-Pix-Signature: $SIG" -d "$BODY"
 ```
 

@@ -32,7 +32,7 @@ Every error from the `/v1` API has the same shape:
 ## Validation example
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/waitlist \
+curl -X POST https://pixactions-api.vercel.app/v1/waitlist \
   -H "Content-Type: application/json" -d '{"email": "nope", "role": "organizer"}'
 ```
 

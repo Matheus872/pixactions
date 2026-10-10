@@ -7,9 +7,9 @@ from .common import EXAMPLE_WALLET, SolanaAddress
 
 _SLUG = "meetup-solana-sp-3f9a"
 EXAMPLE_LINKS = {
-    "checkout_url": f"https://pixactions.app/e/{_SLUG}",
-    "action_url": f"https://pixactions.app/actions/events/{_SLUG}",
-    "blink_url": f"https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2F{_SLUG}&cluster=devnet",
+    "checkout_url": f"https://pixactions.vercel.app/e/{_SLUG}",
+    "action_url": f"https://pixactions.vercel.app/actions/events/{_SLUG}",
+    "blink_url": f"https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.vercel.app%2Factions%2Fevents%2F{_SLUG}&cluster=devnet",
 }
 _COMMON = {
     "slug": _SLUG,

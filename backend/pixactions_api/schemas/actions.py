@@ -36,7 +36,7 @@ class ActionGetResponse(BaseModel):
             "examples": [
                 {
                     "type": "action",
-                    "icon": "https://pixactions.app/opengraph-image",
+                    "icon": "https://pixactions.vercel.app/opengraph-image",
                     "title": "Meetup Solana SP",
                     "description": "São Paulo, SP · 20/10/2026 22:00 UTC · R$ 20.00",
                     "label": "Comprar ingresso · 3.64 USDC",

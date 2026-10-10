@@ -13,7 +13,7 @@ export function PhoneMock() {
         <div className="space-y-4 p-5">
           <div className="flex items-center gap-2 font-mono text-[11px] text-muted">
             <img src="/brand/mark-256.png" alt="" className="h-5 w-5" />
-            pixactions.app/e/meetup-sp
+            pixactions.vercel.app/e/meetup-sp
           </div>
           <div>
             <div className="text-base font-bold leading-tight">Meetup Solana SP</div>

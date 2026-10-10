@@ -34,7 +34,7 @@ sequenceDiagram
 ### 1. Read the event (public)
 
 ```bash
-curl https://api.pixactions.app/v1/events/meetup-solana-sp-3f9a
+curl https://pixactions-api.vercel.app/v1/events/meetup-solana-sp-3f9a
 ```
 
 Returns price, date, `remaining` (read from the onchain counter) and `sold_out`. Draft events return `404`.
@@ -42,7 +42,7 @@ Returns price, date, `remaining` (read from the onchain counter) and `sold_out`.
 ### 2. Create the order
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/orders \
+curl -X POST https://pixactions-api.vercel.app/v1/orders \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"event_slug": "meetup-solana-sp-3f9a", "wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"}'
 ```
@@ -70,7 +70,7 @@ While the order is `funded`, the `transaction` stays identical for `tx_cache_sec
 ### 4. Sign and submit
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/orders/$ORDER_ID/submit \
+curl -X POST https://pixactions-api.vercel.app/v1/orders/$ORDER_ID/submit \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"transaction": "<base64 signed by the buyer wallet>"}'
 ```
@@ -93,5 +93,5 @@ The web app does this automatically: it signs each issued transaction once and, 
 In the sandbox, the Pix is confirmed automatically after `MOCK_PIX_AUTOPAY_SECONDS` (8 s), or immediately with:
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/dev/orders/$ORDER_ID/simulate-payment
+curl -X POST https://pixactions-api.vercel.app/v1/dev/orders/$ORDER_ID/simulate-payment
 ```

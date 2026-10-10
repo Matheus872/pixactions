@@ -9,7 +9,7 @@ EXAMPLE_TICKET = {
     "owner": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
     "checked_in": False,
     "event": {"slug": "meetup-solana-sp-3f9a", "title": "Meetup Solana SP", "venue": "São Paulo, SP", "starts_at": "2026-10-20T22:00:00Z"},
-    "url": f"https://pixactions.app/t/{_PK}",
+    "url": f"https://pixactions.vercel.app/t/{_PK}",
     "explorer_url": f"https://explorer.solana.com/address/{_PK}?cluster=devnet",
 }
 

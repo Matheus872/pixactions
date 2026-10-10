@@ -134,7 +134,7 @@ export function Devs({ t }: { t: LandingCopy }) {
         </div>
       </div>
       <pre className="overflow-x-auto rounded-2xl bg-ink p-6 font-mono text-xs leading-relaxed text-white">
-        <span className="text-brand-bright">$</span> curl pixactions.app/actions/events/meetup-sp{"\n"}
+        <span className="text-brand-bright">$</span> curl pixactions.vercel.app/actions/events/meetup-sp{"\n"}
         {`{
   "type": "action",
   "title": "Meetup Solana SP",

@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://api.pixactions.app",
+      "url": "https://pixactions-api.vercel.app",
       "description": "development"
     }
   ],
@@ -40,7 +40,7 @@
           "Waitlist"
         ],
         "summary": "Join the waitlist",
-        "description": "Adds an email to the waitlist. Idempotent by (case-insensitive) email: repeating the call returns\n`created: false` instead of an error.",
+        "description": "Adds an email to the waitlist. The response is identical whether or not the email was already\non the list, so the endpoint cannot be used to find out who signed up.",
         "operationId": "join_waitlist_v1_waitlist_post",
         "requestBody": {
           "content": {
@@ -1403,7 +1403,7 @@
           {
             "description": "São Paulo, SP · 20/10/2026 22:00 UTC · R$ 20.00",
             "disabled": false,
-            "icon": "https://pixactions.app/opengraph-image",
+            "icon": "https://pixactions.vercel.app/opengraph-image",
             "label": "Comprar ingresso · 3.64 USDC",
             "links": {
               "actions": [
@@ -1779,9 +1779,9 @@
               "description": "Primeiro meetup da comunidade.",
               "id": "4b7f2c1e-8a9d-4f3b-9c2e-1d5a6b7c8d9e",
               "links": {
-                "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
-                "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
-                "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+                "action_url": "https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a",
+                "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.vercel.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+                "checkout_url": "https://pixactions.vercel.app/e/meetup-solana-sp-3f9a"
               },
               "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
               "organizer_wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
@@ -1937,9 +1937,9 @@
             "description": "Primeiro meetup da comunidade.",
             "id": "4b7f2c1e-8a9d-4f3b-9c2e-1d5a6b7c8d9e",
             "links": {
-              "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
-              "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
-              "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+              "action_url": "https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a",
+              "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.vercel.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+              "checkout_url": "https://pixactions.vercel.app/e/meetup-solana-sp-3f9a"
             },
             "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
             "organizer_wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
@@ -2050,9 +2050,9 @@
             "capacity": 50,
             "description": "Primeiro meetup da comunidade.",
             "links": {
-              "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
-              "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
-              "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+              "action_url": "https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a",
+              "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.vercel.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+              "checkout_url": "https://pixactions.vercel.app/e/meetup-solana-sp-3f9a"
             },
             "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
             "price_brl_cents": 2000,
@@ -2323,7 +2323,7 @@
             "ticket": {
               "explorer_url": "https://explorer.solana.com/address/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj?cluster=devnet",
               "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
-              "url": "https://pixactions.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+              "url": "https://pixactions.vercel.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
             }
           }
         ]
@@ -2564,7 +2564,7 @@
             "owner": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
             "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
             "serial": 4,
-            "url": "https://pixactions.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+            "url": "https://pixactions.vercel.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
           }
         ]
       },
@@ -2676,37 +2676,20 @@
       },
       "WaitlistOut": {
         "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "organizer",
-              "buyer",
-              "developer"
-            ],
-            "title": "Role"
-          },
-          "created": {
+          "received": {
             "type": "boolean",
-            "title": "Created",
-            "description": "False when the email was already on the list."
+            "title": "Received",
+            "description": "Always true: the answer is the same for new and existing emails."
           }
         },
         "type": "object",
         "required": [
-          "email",
-          "role",
-          "created"
+          "received"
         ],
         "title": "WaitlistOut",
         "examples": [
           {
-            "created": true,
-            "email": "ana@example.com",
-            "role": "organizer"
+            "received": true
           }
         ]
       },

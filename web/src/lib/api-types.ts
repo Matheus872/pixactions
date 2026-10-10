@@ -36,8 +36,8 @@ export interface paths {
         put?: never;
         /**
          * Join the waitlist
-         * @description Adds an email to the waitlist. Idempotent by (case-insensitive) email: repeating the call returns
-         *     `created: false` instead of an error.
+         * @description Adds an email to the waitlist. The response is identical whether or not the email was already
+         *     on the list, so the endpoint cannot be used to find out who signed up.
          */
         post: operations["join_waitlist_v1_waitlist_post"];
         delete?: never;
@@ -409,7 +409,7 @@ export interface components {
          * @example {
          *       "description": "São Paulo, SP · 20/10/2026 22:00 UTC · R$ 20.00",
          *       "disabled": false,
-         *       "icon": "https://pixactions.app/opengraph-image",
+         *       "icon": "https://pixactions.vercel.app/opengraph-image",
          *       "label": "Comprar ingresso · 3.64 USDC",
          *       "links": {
          *         "actions": [
@@ -645,9 +645,9 @@ export interface components {
          *         "description": "Primeiro meetup da comunidade.",
          *         "id": "4b7f2c1e-8a9d-4f3b-9c2e-1d5a6b7c8d9e",
          *         "links": {
-         *           "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
-         *           "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
-         *           "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+         *           "action_url": "https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a",
+         *           "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.vercel.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+         *           "checkout_url": "https://pixactions.vercel.app/e/meetup-solana-sp-3f9a"
          *         },
          *         "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
          *         "organizer_wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
@@ -698,9 +698,9 @@ export interface components {
          *       "description": "Primeiro meetup da comunidade.",
          *       "id": "4b7f2c1e-8a9d-4f3b-9c2e-1d5a6b7c8d9e",
          *       "links": {
-         *         "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
-         *         "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
-         *         "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+         *         "action_url": "https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a",
+         *         "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.vercel.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+         *         "checkout_url": "https://pixactions.vercel.app/e/meetup-solana-sp-3f9a"
          *       },
          *       "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
          *       "organizer_wallet": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
@@ -769,9 +769,9 @@ export interface components {
          *       "capacity": 50,
          *       "description": "Primeiro meetup da comunidade.",
          *       "links": {
-         *         "action_url": "https://pixactions.app/actions/events/meetup-solana-sp-3f9a",
-         *         "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
-         *         "checkout_url": "https://pixactions.app/e/meetup-solana-sp-3f9a"
+         *         "action_url": "https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a",
+         *         "blink_url": "https://dial.to/?action=solana-action%3Ahttps%3A%2F%2Fpixactions.vercel.app%2Factions%2Fevents%2Fmeetup-solana-sp-3f9a&cluster=devnet",
+         *         "checkout_url": "https://pixactions.vercel.app/e/meetup-solana-sp-3f9a"
          *       },
          *       "onchain_pubkey": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
          *       "price_brl_cents": 2000,
@@ -909,7 +909,7 @@ export interface components {
          *       "ticket": {
          *         "explorer_url": "https://explorer.solana.com/address/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj?cluster=devnet",
          *         "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
-         *         "url": "https://pixactions.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+         *         "url": "https://pixactions.vercel.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
          *       }
          *     }
          */
@@ -1058,7 +1058,7 @@ export interface components {
          *       "owner": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
          *       "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
          *       "serial": 4,
-         *       "url": "https://pixactions.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+         *       "url": "https://pixactions.vercel.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
          *     }
          */
         TicketOut: {
@@ -1137,24 +1137,15 @@ export interface components {
         /**
          * WaitlistOut
          * @example {
-         *       "created": true,
-         *       "email": "ana@example.com",
-         *       "role": "organizer"
+         *       "received": true
          *     }
          */
         WaitlistOut: {
-            /** Email */
-            email: string;
             /**
-             * Role
-             * @enum {string}
+             * Received
+             * @description Always true: the answer is the same for new and existing emails.
              */
-            role: "organizer" | "buyer" | "developer";
-            /**
-             * Created
-             * @description False when the email was already on the list.
-             */
-            created: boolean;
+            received: boolean;
         };
         /**
          * WebhookAck

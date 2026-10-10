@@ -1,5 +1,4 @@
 from pixactions_api.db import normalize_db_url
-
 from pixactions_api.solana.constants import PROGRAM_ID
 
 
@@ -26,12 +25,13 @@ async def test_openapi_is_served(client):
     assert r.json()["info"]["title"] == "Pix Actions API"
 
 
-async def test_waitlist_is_idempotent(client):
+async def test_waitlist_does_not_reveal_existing_emails(client):
+    """Same answer for new and existing emails: the endpoint must not let anyone probe who signed up."""
     body = {"email": "Ana@Example.com", "role": "organizer", "lang": "pt"}
     r1 = await client.post("/v1/waitlist", json=body)
-    r2 = await client.post("/v1/waitlist", json=body)
-    assert r1.status_code == 200 and r1.json() == {"email": "ana@example.com", "role": "organizer", "created": True}
-    assert r2.status_code == 200 and r2.json()["created"] is False
+    r2 = await client.post("/v1/waitlist", json=body | {"role": "buyer"})
+    assert r1.status_code == r2.status_code == 200
+    assert r1.json() == r2.json() == {"received": True}
 
 
 async def test_validation_error_has_standard_shape(client):

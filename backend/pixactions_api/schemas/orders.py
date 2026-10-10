@@ -61,7 +61,7 @@ class OrderOut(BaseModel):
                     "status": "confirmed", "pix": None, "funding_tx_sig": "5xTq...9Kd", "buy_tx_sig": "3Hn2...pQ1",
                     "ticket": {
                         "pubkey": _TICKET,
-                        "url": f"https://pixactions.app/t/{_TICKET}",
+                        "url": f"https://pixactions.vercel.app/t/{_TICKET}",
                         "explorer_url": f"https://explorer.solana.com/address/{_TICKET}?cluster=devnet",
                     },
                 },

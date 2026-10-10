@@ -5,7 +5,7 @@ Every live event is also a [Solana Action](https://solana.com/developers/guides/
 ## Discovery: `actions.json`
 
 ```bash
-curl https://pixactions.app/actions.json
+curl https://pixactions.vercel.app/actions.json
 ```
 
 ```json
@@ -17,15 +17,15 @@ The web app rewrites `/actions.json` and `/actions/*` to the API, so actions liv
 ## GET: metadata
 
 ```bash
-curl https://pixactions.app/actions/events/meetup-solana-sp-3f9a
+curl https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a
 ```
 
 ```json
 {
   "type": "action",
-  "icon": "https://pixactions.app/opengraph-image",
+  "icon": "https://pixactions.vercel.app/opengraph-image",
   "title": "Meetup Solana SP",
-  "description": "São Paulo, SP · 20/10/2026 22:00 UTC · R$ 20.00. Sem carteira? Pague com Pix em https://pixactions.app/e/meetup-solana-sp-3f9a",
+  "description": "São Paulo, SP · 20/10/2026 22:00 UTC · R$ 20.00. Sem carteira? Pague com Pix em https://pixactions.vercel.app/e/meetup-solana-sp-3f9a",
   "label": "Comprar ingresso · 3.64 USDC",
   "disabled": false,
   "links": { "actions": [{ "type": "transaction", "label": "Comprar ingresso · 3.64 USDC", "href": "/actions/events/meetup-solana-sp-3f9a" }] },
@@ -38,7 +38,7 @@ When the event is sold out, `disabled` is `true` and `error.message` is `Esgotad
 ## POST: transaction
 
 ```bash
-curl -X POST https://pixactions.app/actions/events/meetup-solana-sp-3f9a \
+curl -X POST https://pixactions.vercel.app/actions/events/meetup-solana-sp-3f9a \
   -H "Content-Type: application/json" \
   -d '{"account": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"}'
 ```

@@ -156,6 +156,9 @@ function PixPanel({ order, onSimulate }: { order: OrderOut; onSimulate?: () => P
   return (
     <Card className="space-y-4 text-center">
       <h2 className="text-lg font-bold">Pague com Pix</h2>
+      <p className="rounded-xl border border-danger/30 bg-danger/5 px-3 py-2 text-sm font-semibold text-danger">
+        Demonstração: o pagamento é simulado e confirma sozinho. Não pague este código no app do banco.
+      </p>
       <img src={`data:image/png;base64,${pix.qr_png_base64}`} alt="QR code Pix" className="mx-auto w-56 rounded-xl border border-line" />
       <div className="break-all rounded-xl bg-brand-soft p-3 font-mono text-xs">{pix.brcode}</div>
       <div className="flex justify-center gap-2">

@@ -7,7 +7,7 @@ The Pix Actions API lets anyone pay with Pix and receive an onchain asset on Sol
 | Item | Value |
 |---|---|
 | Cluster | Solana devnet |
-| Base URL | `https://api.pixactions.app` (replace with your deployment) |
+| Base URL | `https://pixactions-api.vercel.app` (replace with your deployment) |
 | Interactive reference | `GET /docs` (Scalar, with "try it" and code samples) |
 | Alternative reference | `GET /redoc` |
 | OpenAPI document | `GET /openapi.json`, also committed at [`openapi.json`](openapi.json) |
@@ -60,7 +60,7 @@ A signed transaction that differs from the issued one is rejected with `TX_MISMA
 ## Quick check
 
 ```bash
-curl https://api.pixactions.app/health
+curl https://pixactions-api.vercel.app/health
 ```
 
 ```json

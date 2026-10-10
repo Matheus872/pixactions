@@ -5,7 +5,7 @@ Organizers create an event, publish it onchain with one signature, share the che
 ## 1. Create the event (draft)
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/events \
+curl -X POST https://pixactions-api.vercel.app/v1/events \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{
     "title": "Meetup Solana SP",
@@ -25,7 +25,7 @@ The response is an `EventDraft`: the event in `draft` status plus `transaction`,
 Sign `transaction` with the organizer wallet and submit:
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/events/$EVENT_ID/submit \
+curl -X POST https://pixactions-api.vercel.app/v1/events/$EVENT_ID/submit \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"transaction": "<base64 signed by the organizer wallet>"}'
 ```
@@ -35,7 +35,7 @@ The event becomes `live`. Submitting again once live is harmless and returns the
 If signing took too long and the submit returns `TX_EXPIRED`, get a fresh transaction and try again:
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/events/$EVENT_ID/transaction -H "Authorization: Bearer $TOKEN"
+curl -X POST https://pixactions-api.vercel.app/v1/events/$EVENT_ID/transaction -H "Authorization: Bearer $TOKEN"
 ```
 
 ## 3. Share
@@ -51,8 +51,8 @@ Every event carries three links:
 ## 4. Follow sales
 
 ```bash
-curl https://api.pixactions.app/v1/me/events -H "Authorization: Bearer $TOKEN"
-curl https://api.pixactions.app/v1/events/$EVENT_ID/orders -H "Authorization: Bearer $TOKEN"
+curl https://pixactions-api.vercel.app/v1/me/events -H "Authorization: Bearer $TOKEN"
+curl https://pixactions-api.vercel.app/v1/events/$EVENT_ID/orders -H "Authorization: Bearer $TOKEN"
 ```
 
 `sold` is read from the onchain counter, so it includes tickets bought through Blinks. Orders list buyers by wallet only; no personal data is exposed.
@@ -63,13 +63,13 @@ The ticket QR encodes `https://<web>/t/<ticket pubkey>`. For each scanned ticket
 
 ```bash
 # Issue the check_in transaction (organizer only)
-curl -X POST https://api.pixactions.app/v1/tickets/$TICKET/checkin -H "Authorization: Bearer $TOKEN"
+curl -X POST https://pixactions-api.vercel.app/v1/tickets/$TICKET/checkin -H "Authorization: Bearer $TOKEN"
 ```
 
 The response has `transaction` (sign it with the organizer wallet) and `checkin_token` (send it back unchanged):
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/tickets/$TICKET/checkin/submit \
+curl -X POST https://pixactions-api.vercel.app/v1/tickets/$TICKET/checkin/submit \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"transaction": "<base64 signed>", "checkin_token": "<from the previous call>"}'
 ```

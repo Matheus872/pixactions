@@ -7,15 +7,15 @@ type Role = keyof LandingCopy["waitlist"]["roles"];
 
 export function WaitlistForm({ t, lang }: { t: LandingCopy; lang: Lang }) {
   const [role, setRole] = useState<Role>("organizer");
-  const [state, setState] = useState<"idle" | "busy" | "success" | "already" | "error">("idle");
+  const [state, setState] = useState<"idle" | "busy" | "success" | "error">("idle");
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setState("busy");
     const email = String(new FormData(e.currentTarget).get("email"));
     try {
-      const res = await api<{ created: boolean }>("/v1/waitlist", { method: "POST", body: { email, role, lang } });
-      setState(res.created ? "success" : "already");
+      await api<{ received: boolean }>("/v1/waitlist", { method: "POST", body: { email, role, lang } });
+      setState("success");
     } catch {
       setState("error");
     }
@@ -44,7 +44,6 @@ export function WaitlistForm({ t, lang }: { t: LandingCopy; lang: Lang }) {
         </button>
       </div>
       {state === "success" && <p className="text-brand-ink">{t.waitlist.success}</p>}
-      {state === "already" && <p className="text-brand-ink">{t.waitlist.already}</p>}
       {state === "error" && <p className="text-danger">{t.waitlist.error}</p>}
     </form>
   );

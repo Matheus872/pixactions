@@ -12,7 +12,7 @@ import { usePrivy } from "@privy-io/react-auth";
 const { getAccessToken } = usePrivy();
 const token = await getAccessToken();
 
-await fetch("https://api.pixactions.app/v1/me/events", {
+await fetch("https://pixactions-api.vercel.app/v1/me/events", {
   headers: { Authorization: `Bearer ${token}` },
 });
 ```
@@ -50,7 +50,7 @@ Embedded wallets are non-custodial: the key is split into shares and neither Pix
 A missing, malformed or expired token returns `401`:
 
 ```bash
-curl -X POST https://api.pixactions.app/v1/events -H "Content-Type: application/json" -d '{}'
+curl -X POST https://pixactions-api.vercel.app/v1/events -H "Content-Type: application/json" -d '{}'
 ```
 
 ```json

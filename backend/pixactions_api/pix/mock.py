@@ -22,7 +22,7 @@ class MockPixProvider:
     async def create_charge(self, *, order_id: str, amount_brl_cents: int, description: str) -> PixCharge:
         charge_id = "MOCK" + order_id.replace("-", "")[:21].upper()
         brcode = build_brcode(
-            pix_key="sandbox@pixactions.dev",
+            pix_key="SANDBOX-NAO-PAGUE",  # not a valid Pix key type: no bank can pay it
             amount_brl_cents=amount_brl_cents,
             merchant_name="PIX ACTIONS SANDBOX",
             merchant_city="SAO PAULO",

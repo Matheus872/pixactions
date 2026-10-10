@@ -14,8 +14,6 @@ class WaitlistIn(BaseModel):
 
 
 class WaitlistOut(BaseModel):
-    model_config = ConfigDict(json_schema_extra={"examples": [{"email": "ana@example.com", "role": "organizer", "created": True}]})
+    model_config = ConfigDict(json_schema_extra={"examples": [{"received": True}]})
 
-    email: str
-    role: Role
-    created: bool = Field(description="False when the email was already on the list.")
+    received: bool = Field(description="Always true: the answer is the same for new and existing emails.")

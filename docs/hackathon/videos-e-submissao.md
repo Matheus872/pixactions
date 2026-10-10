@@ -23,7 +23,7 @@ Pix Actions turns any Solana action into a link paid with Pix. The buyer logs in
 [Mostre, sem cortes longos:]
 1. Dashboard: create an event in seconds. It is registered on Solana.
 2. Share the link on WhatsApp. [Mostre a prévia com nome e preço.]
-3. On the phone: open the link, log in with email, pay with Pix. [Sandbox: confirma sozinho.]
+3. On the phone: open the link, log in with email, pay with Pix. [Sandbox: confirma sozinho. Não mostre sua caixa de e-mail, abas do navegador nem dashboards na gravação.]
 4. The ticket appears with a QR code. [Clique em "Ver no Explorer" e mostre a conta na devnet.]
 5. At the door: scan the QR. Entry allowed. Scan again: already used.
 
@@ -101,7 +101,7 @@ The same rails extend to subscriptions (Pix Automático), digital products, dona
 
 Mensagem para amigos e para o grupo do hackathon:
 
-> Lancei o Pix Actions no hackathon da Solana: você paga com Pix e recebe um ingresso on-chain, sem instalar carteira. Me ajuda testando? Leva 1 minuto e não custa nada (Pix de teste): https://pixactions.vercel.app/e/pix-actions-demo-night-0ed2
+> Lancei o Pix Actions no hackathon da Solana: você paga com Pix e recebe um ingresso on-chain, sem instalar carteira. Me ajuda testando? Leva 1 minuto e não custa nada: o pagamento é simulado, então NÃO abra o app do banco, é só esperar uns segundos: https://pixactions.vercel.app/e/pix-actions-demo-night-0ed2
 > Se curtir, entra na lista de espera: https://pixactions.vercel.app/#waitlist
 
 Post no X (marque @colosseum e @SuperteamBR):
