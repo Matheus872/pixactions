@@ -1,7 +1,7 @@
 "use client";
 import { usePrivy } from "@privy-io/react-auth";
 import { useTxSigner } from "@/lib/useTxSigner";
-import { Card, NeonButton, Spinner } from "./ui";
+import { Card, BrandButton, Spinner } from "./ui";
 
 const PERKS = ["Sem seed phrase nem extensão", "Carteira não custodial: só você controla", "Taxas da rede por nossa conta"];
 
@@ -12,16 +12,16 @@ export function AuthGate({ children, title = "Entre para continuar" }: { childre
   if (!authenticated)
     return (
       <Card className="mx-auto mt-10 max-w-md space-y-6 p-8 text-center shadow-xl shadow-ink/5">
-        <img src="/brand/mark.svg" alt="" className="mx-auto h-12 w-12" />
+        <img src="/brand/mark-256.png" alt="" className="mx-auto h-16 w-16" />
         <div className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
           <p className="text-sm text-muted">Entre com seu e-mail. Sua carteira Solana é criada na hora.</p>
         </div>
-        <NeonButton onClick={login} className="w-full">Entrar com e-mail</NeonButton>
+        <BrandButton onClick={login} className="w-full">Entrar com e-mail</BrandButton>
         <ul className="space-y-2 border-t border-line pt-5 text-left text-sm">
           {PERKS.map((perk) => (
             <li key={perk} className="flex items-center gap-3">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-neon-soft text-[11px] font-bold text-neon-ink">✓</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[11px] font-bold text-brand-ink">✓</span>
               {perk}
             </li>
           ))}

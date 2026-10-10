@@ -39,12 +39,12 @@ export function WaitlistForm({ t, lang }: { t: LandingCopy; lang: Lang }) {
       </div>
       <div className="flex flex-col gap-2 sm:flex-row">
         <input name="email" type="email" required placeholder={t.waitlist.email} className="flex-1 rounded-xl border border-line px-4 py-3" />
-        <button disabled={state === "busy"} className="glow rounded-xl bg-neon px-6 py-3 font-bold text-ink disabled:opacity-60">
+        <button disabled={state === "busy"} className="glow rounded-xl bg-brand px-6 py-3 font-bold text-white disabled:opacity-60">
           {t.waitlist.submit}
         </button>
       </div>
-      {state === "success" && <p className="text-neon-ink">{t.waitlist.success}</p>}
-      {state === "already" && <p className="text-neon-ink">{t.waitlist.already}</p>}
+      {state === "success" && <p className="text-brand-ink">{t.waitlist.success}</p>}
+      {state === "already" && <p className="text-brand-ink">{t.waitlist.already}</p>}
       {state === "error" && <p className="text-danger">{t.waitlist.error}</p>}
     </form>
   );

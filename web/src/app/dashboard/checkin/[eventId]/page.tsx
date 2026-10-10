@@ -74,7 +74,7 @@ function CheckinScanner({ eventId }: { eventId: string }) {
     handle(String(new FormData(e.currentTarget).get("code") ?? ""));
   }
 
-  const color = result?.kind === "ok" ? "bg-neon text-ink" : result?.kind === "used" ? "bg-line text-ink" : "bg-danger text-white";
+  const color = result?.kind === "ok" ? "bg-brand text-ink" : result?.kind === "used" ? "bg-line text-ink" : "bg-danger text-white";
   return (
     <div className="mx-auto max-w-md space-y-4">
       <Link href={`/dashboard/events/${eventId}`} className="text-sm text-muted">← {event?.title ?? "Evento"}</Link>

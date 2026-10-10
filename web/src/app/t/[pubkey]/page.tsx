@@ -11,7 +11,7 @@ export default async function TicketPage({ params }: { params: Promise<{ pubkey:
   return (
     <AppShell>
       <Card className="mx-auto max-w-md space-y-4 text-center">
-        <div className={`rounded-xl py-3 text-lg font-extrabold ${ticket.checked_in ? "bg-line text-muted" : "bg-neon text-ink"}`}>
+        <div className={`rounded-xl py-3 text-lg font-extrabold ${ticket.checked_in ? "bg-line text-muted" : "bg-brand text-ink"}`}>
           {ticket.checked_in ? "Ingresso já utilizado" : "✓ Ingresso válido"}
         </div>
         {ticket.event && (
@@ -25,7 +25,7 @@ export default async function TicketPage({ params }: { params: Promise<{ pubkey:
           <dt className="text-muted">Ingresso</dt><dd className="font-mono">#{ticket.serial + 1}</dd>
           <dt className="text-muted">Dono</dt><dd className="font-mono">{shortAddr(ticket.owner)}</dd>
         </dl>
-        <a href={ticket.explorer_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-neon-ink underline">
+        <a href={ticket.explorer_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-brand-ink underline">
           Verificar na Solana Explorer
         </a>
       </Card>

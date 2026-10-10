@@ -65,7 +65,7 @@ function EventAdmin({ id }: { id: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/dashboard" className="text-sm text-muted">← Seus eventos</Link>
+        <Link href="/dashboard" className="text-sm text-muted">← Suas ações</Link>
         <h1 className="mt-2 text-2xl font-bold">{event.title}</h1>
         <p className="text-sm text-muted">{formatDate(event.starts_at)} · {event.venue}</p>
       </div>
@@ -85,7 +85,7 @@ function EventAdmin({ id }: { id: string }) {
         <div className="break-all font-mono text-sm">{event.links.checkout_url}</div>
         <div className="flex flex-wrap gap-2">
           <CopyButton text={event.links.checkout_url} />
-          <a href={share} target="_blank" rel="noreferrer" className="rounded-xl bg-neon px-4 py-3 text-sm font-bold text-ink">Compartilhar no WhatsApp</a>
+          <a href={share} target="_blank" rel="noreferrer" className="rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white">Compartilhar no WhatsApp</a>
           <a href={event.links.blink_url} target="_blank" rel="noreferrer" className="rounded-xl border border-line px-4 py-3 text-sm font-semibold">Abrir como Blink</a>
           <Link href={`/dashboard/checkin/${event.id}`} className="rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white">Abrir check-in</Link>
         </div>
@@ -102,7 +102,7 @@ function EventAdmin({ id }: { id: string }) {
                   <td className="py-2 font-mono">{shortAddr(o.buyer_wallet)}</td>
                   <td>{STATUS_PT[o.status] ?? o.status}</td>
                   <td className="text-right">
-                    {o.ticket_pubkey ? <a className="text-neon-ink underline" href={`/t/${o.ticket_pubkey}`}>ingresso</a> : "—"}
+                    {o.ticket_pubkey ? <a className="text-brand-ink underline" href={`/t/${o.ticket_pubkey}`}>ingresso</a> : "—"}
                   </td>
                 </tr>
               ))}

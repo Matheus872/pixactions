@@ -10,7 +10,7 @@ import { useAuthedApi } from "@/lib/useAuthedApi";
 export default function DashboardPage() {
   return (
     <AppShell>
-      <AuthGate title="Painel do organizador">
+      <AuthGate title="Painel de vendas">
         <EventList />
       </AuthGate>
     </AppShell>
@@ -27,22 +27,22 @@ function EventList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Seus eventos</h1>
-        <Link href="/dashboard/new" className="rounded-xl bg-neon px-4 py-2 text-sm font-bold text-ink">+ Novo evento</Link>
+        <h1 className="text-2xl font-bold">Suas ações</h1>
+        <Link href="/dashboard/new" className="rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white">+ Nova ação</Link>
       </div>
       {error && <Alert>{error}</Alert>}
       {!events && !error && <Spinner label="Carregando eventos…" />}
-      {events?.length === 0 && <Card className="text-center text-muted">Nenhum evento ainda. Crie o primeiro!</Card>}
+      {events?.length === 0 && <Card className="text-center text-muted">Nenhuma ação ainda. Crie a primeira!</Card>}
       {events?.map((ev) => (
         <Link key={ev.id} href={`/dashboard/events/${ev.id}`} className="block">
           <Card className="flex items-center justify-between transition hover:border-ink">
             <div>
-              <div className="font-semibold">{ev.title}</div>
+              <div className="flex items-center gap-2 font-semibold">{ev.title}<span className="rounded-full bg-brand-soft px-2 py-0.5 font-mono text-[10px] font-medium text-brand-ink">ingresso</span></div>
               <div className="text-sm text-muted">{formatDate(ev.starts_at)} · {ev.venue}</div>
             </div>
             <div className="text-right">
               <div className="font-mono text-sm">{ev.sold}/{ev.capacity}</div>
-              <div className={`text-xs ${ev.status === "live" ? "text-neon-ink" : "text-muted"}`}>
+              <div className={`text-xs ${ev.status === "live" ? "text-brand-ink" : "text-muted"}`}>
                 {ev.status === "live" ? "no ar" : "rascunho"}
               </div>
             </div>

@@ -2,10 +2,9 @@
 import { useEffect, useState } from "react";
 import { copy, type Lang } from "@/i18n/landing";
 import { PhoneMock } from "./PhoneMock";
-import { BuiltWith, Devs, FinalCta, Footer, Hero, Nav, Numbers, Problems, Steps } from "./sections";
+import { BuiltWith, Devs, FinalCta, Footer, Hero, Nav, Numbers, Problems, Steps, UseCases } from "./sections";
 import { WaitlistForm } from "./WaitlistForm";
 
-const HAS_ART = false;
 const KEY = "pixactions.lang";
 
 export function Landing() {
@@ -33,15 +32,15 @@ export function Landing() {
   }
 
   const t = copy[lang];
-  const heroImage = HAS_ART ? <img src="/brand/hero.png" alt="" className="mx-auto w-full max-w-xl" /> : <PhoneMock />;
   return (
     <div className="bg-paper text-ink">
       <Nav t={t} lang={lang} onLang={change} />
       <main>
-        <Hero t={t} heroImage={heroImage} />
+        <Hero t={t} visual={<PhoneMock />} />
         <BuiltWith t={t} />
         <Problems t={t} />
-        <Steps t={t} illustrated={HAS_ART} />
+        <UseCases t={t} />
+        <Steps t={t} />
         <Devs t={t} />
         <Numbers t={t} />
         <section id="waitlist" className="mx-auto max-w-6xl px-4 py-24">

@@ -7,7 +7,7 @@ import { formatBRL, formatDate } from "@/lib/format";
 import { useAuthedApi } from "@/lib/useAuthedApi";
 import { useTxSigner } from "@/lib/useTxSigner";
 import { CopyButton } from "./CopyButton";
-import { Alert, Button, Card, NeonButton, Spinner } from "./ui";
+import { Alert, Button, Card, BrandButton, Spinner } from "./ui";
 
 const ACTIVE = ["pending_payment", "paid", "funding", "funded"];
 const SHOW_DEV = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "1";
@@ -96,9 +96,9 @@ export function Checkout({ event }: { event: EventPublic }) {
         (event.sold_out ? (
           <Card className="text-center font-semibold">Esgotado</Card>
         ) : (
-          <NeonButton className="w-full" onClick={start} disabled={preparing && authenticated}>
+          <BrandButton className="w-full" onClick={start} disabled={preparing && authenticated}>
             {preparing && authenticated ? "Preparando seu Pix…" : `Pagar ${formatBRL(event.price_brl_cents)} com Pix`}
-          </NeonButton>
+          </BrandButton>
         ))}
       {order?.status === "pending_payment" && order.pix && (
         <PixPanel order={order} onSimulate={SHOW_DEV ? () => api(`/v1/dev/orders/${order.id}/simulate-payment`, { method: "POST" }) : undefined} />
@@ -157,7 +157,7 @@ function PixPanel({ order, onSimulate }: { order: OrderOut; onSimulate?: () => P
     <Card className="space-y-4 text-center">
       <h2 className="text-lg font-bold">Pague com Pix</h2>
       <img src={`data:image/png;base64,${pix.qr_png_base64}`} alt="QR code Pix" className="mx-auto w-56 rounded-xl border border-line" />
-      <div className="break-all rounded-xl bg-neon-soft p-3 font-mono text-xs">{pix.brcode}</div>
+      <div className="break-all rounded-xl bg-brand-soft p-3 font-mono text-xs">{pix.brcode}</div>
       <div className="flex justify-center gap-2">
         <CopyButton text={pix.brcode} label="Copiar código Pix" />
         {onSimulate && <Button variant="ghost" onClick={() => onSimulate()}>Simular pagamento</Button>}
@@ -170,7 +170,7 @@ function PixPanel({ order, onSimulate }: { order: OrderOut; onSimulate?: () => P
 function TicketCard({ ticket }: { ticket: NonNullable<OrderOut["ticket"]> }) {
   return (
     <Card className="glow space-y-4 text-center">
-      <div className="text-sm font-semibold text-neon-ink">✓ Ingresso emitido na Solana</div>
+      <div className="text-sm font-semibold text-brand-ink">✓ Ingresso emitido na Solana</div>
       <QRCodeSVG value={ticket.url} size={220} className="mx-auto" />
       <p className="text-sm text-muted">Apresente este QR na entrada. Ele também fica salvo na sua carteira.</p>
       <div className="flex justify-center gap-2">

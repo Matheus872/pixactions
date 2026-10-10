@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { AuthGate } from "@/components/AuthGate";
-import { Alert, AppShell, Card, NeonButton } from "@/components/ui";
+import { Alert, AppShell, Card, BrandButton } from "@/components/ui";
 import { ApiError, messageFor, type EventDraft, type EventOut } from "@/lib/api";
 import { useAuthedApi } from "@/lib/useAuthedApi";
 import { useTxSigner } from "@/lib/useTxSigner";
@@ -10,7 +10,7 @@ import { useTxSigner } from "@/lib/useTxSigner";
 export default function NewEventPage() {
   return (
     <AppShell>
-      <AuthGate title="Crie seu evento">
+      <AuthGate title="Crie sua ação">
         <NewEventForm />
       </AuthGate>
     </AppShell>
@@ -72,7 +72,9 @@ function NewEventForm() {
   return (
     <Card>
       <form onSubmit={onSubmit} className="space-y-4">
-        <h1 className="text-2xl font-bold">Novo evento</h1>
+        <h1 className="text-2xl font-bold">Nova ação</h1>
+        <ActionTypePicker />
+        <p className="text-sm text-muted">Ingresso: venda pelo link, ingresso on-chain na carteira de quem compra e check-in na porta.</p>
         <input name="title" required minLength={3} maxLength={80} placeholder="Nome do evento" className={input} />
         <textarea name="description" maxLength={1000} placeholder="Descrição (opcional)" className={input} />
         <input name="venue" maxLength={120} placeholder="Local" className={input} />
@@ -82,11 +84,40 @@ function NewEventForm() {
           <input name="capacity" type="number" min={1} max={10000} required placeholder="Lotação" className={input} />
         </div>
         {error && <Alert>{error}</Alert>}
-        <NeonButton type="submit" disabled={busy} className="w-full">
+        <BrandButton type="submit" disabled={busy} className="w-full">
           {busy ? "Registrando na Solana…" : "Criar e publicar"}
-        </NeonButton>
+        </BrandButton>
         <p className="text-xs text-muted">O evento é registrado on-chain. Você assina com sua carteira e a gente paga as taxas da rede.</p>
       </form>
     </Card>
+  );
+}
+
+const ACTION_TYPES = [
+  { id: "ticket", label: "Ingresso", live: true },
+  { id: "subscription", label: "Assinatura", live: false },
+  { id: "token", label: "Token", live: false },
+  { id: "donation", label: "Doação", live: false },
+  { id: "digital", label: "Produto digital", live: false },
+  { id: "any", label: "Qualquer Solana Action", live: false },
+];
+
+function ActionTypePicker() {
+  return (
+    <div role="radiogroup" aria-label="Tipo de ação" className="flex flex-wrap gap-2">
+      {ACTION_TYPES.map((type) => (
+        <button
+          key={type.id}
+          type="button"
+          role="radio"
+          aria-checked={type.live}
+          disabled={!type.live}
+          className={`rounded-full border px-3 py-1.5 text-sm ${type.live ? "border-brand bg-brand text-white" : "cursor-not-allowed border-line text-muted"}`}
+        >
+          {type.label}
+          {!type.live && <span className="ml-1 font-mono text-[10px]">em breve</span>}
+        </button>
+      ))}
+    </div>
   );
 }

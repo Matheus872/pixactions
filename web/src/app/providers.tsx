@@ -18,7 +18,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
       config={{
         loginMethods: ["email"],
-        appearance: { theme: "light", accentColor: "#00C853", walletChainType: "solana-only", logo: "/brand/mark.svg" },
+        appearance: { theme: "light", accentColor: "#087F54", walletChainType: "solana-only", logo: "/brand/logo.png" },
         embeddedWallets: { solana: { createOnLogin: "all-users" } },
         solana: { rpcs: solanaRpcs },
       }}

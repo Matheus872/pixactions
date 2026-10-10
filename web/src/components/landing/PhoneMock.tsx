@@ -6,12 +6,13 @@ const SAMPLE_PIX = "00020101021226360014br.gov.bcb.pix0114sandbox@pixactions5204
 export function PhoneMock() {
   return (
     <div className="relative mx-auto w-full max-w-sm py-8">
-      <div aria-hidden className="absolute inset-x-6 inset-y-10 -z-10 rounded-full bg-neon/30 blur-3xl" />
+      <div aria-hidden className="absolute inset-x-6 inset-y-10 -z-10 rounded-full bg-brand/25 blur-3xl" />
+      <img src="/brand/mark.png" alt="" aria-hidden className="absolute -left-8 top-2 z-10 hidden w-28 -rotate-12 drop-shadow-2xl sm:block" />
       <div className="glow relative mx-auto w-72 rounded-[2.75rem] border-[10px] border-ink bg-white shadow-2xl">
         <div className="mx-auto mt-3 h-1.5 w-20 rounded-full bg-line" />
         <div className="space-y-4 p-5">
           <div className="flex items-center gap-2 font-mono text-[11px] text-muted">
-            <img src="/brand/mark.svg" alt="" className="h-5 w-5" />
+            <img src="/brand/mark-256.png" alt="" className="h-5 w-5" />
             pixactions.app/e/meetup-sp
           </div>
           <div>
@@ -25,15 +26,15 @@ export function PhoneMock() {
             <span className="text-2xl font-extrabold">R$ 20,00</span>
             <span className="font-mono text-xs text-muted">≈ 3.64 USDC</span>
           </div>
-          <div className="rounded-xl bg-neon py-3 text-center text-sm font-bold text-ink">✓ Pix recebido</div>
+          <div className="rounded-xl bg-brand py-3 text-center text-sm font-bold text-white">✓ Pix recebido</div>
         </div>
       </div>
       <div className="absolute right-0 top-1 sm:-right-4 rotate-6 rounded-2xl border border-line bg-white px-4 py-3 shadow-xl">
-        <div className="text-[10px] font-bold tracking-wider text-neon-ink">INGRESSO ON-CHAIN</div>
+        <div className="text-[10px] font-bold tracking-wider text-brand-ink">INGRESSO ON-CHAIN</div>
         <div className="font-mono text-xs">#0042 · Solana</div>
       </div>
       <div className="absolute left-0 bottom-1 sm:-left-4 -rotate-3 rounded-2xl bg-ink px-4 py-3 text-white shadow-xl">
-        <div className="text-[10px] font-bold tracking-wider text-neon">CHECK-IN</div>
+        <div className="text-[10px] font-bold tracking-wider text-brand-bright">CHECK-IN</div>
         <div className="font-mono text-xs">✓ entrada liberada</div>
       </div>
     </div>

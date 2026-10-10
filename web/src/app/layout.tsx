@@ -10,7 +10,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000"),
   title: "Pix Actions: pague com Pix, receba on-chain",
   description: "Venda ingressos on-chain na Solana para quem só tem Pix. Sem carteira, sem corretora.",
-  icons: { icon: "/brand/mark.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
