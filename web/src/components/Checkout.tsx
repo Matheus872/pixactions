@@ -20,6 +20,8 @@ export function Checkout({ event }: { event: EventPublic }) {
   const [order, setOrder] = useState<OrderOut | null>(null);
   const [error, setError] = useState<string | null>(null);
   const attemptedTx = useRef<string | null>(null);
+  // After an error that will not fix itself (rejected signature, program error) stop prompting the wallet.
+  const [signPaused, setSignPaused] = useState(false);
 
   // 1) Logged in with a wallet → open (or resume) the order.
   useEffect(() => {
@@ -46,7 +48,7 @@ export function Checkout({ event }: { event: EventPublic }) {
   // 3) Funded → sign once per issued transaction and submit.
   useEffect(() => {
     const tx = order?.transaction;
-    if (!order || order.status !== "funded" || !tx || attemptedTx.current === tx) return;
+    if (!order || order.status !== "funded" || !tx || signPaused || attemptedTx.current === tx) return;
     attemptedTx.current = tx;
     (async () => {
       try {
@@ -55,15 +57,25 @@ export function Checkout({ event }: { event: EventPublic }) {
         setError(null);
       } catch (e) {
         // TX_STALE / TX_EXPIRED: the next poll brings a fresh transaction, signed automatically.
-        if (!(e instanceof ApiError && (e.code === "TX_STALE" || e.code === "TX_EXPIRED"))) setError(messageFor(e));
+        if (!(e instanceof ApiError && (e.code === "TX_STALE" || e.code === "TX_EXPIRED"))) {
+          setError(messageFor(e));
+          setSignPaused(true);
+        }
       }
     })();
-  }, [order, signer, call]);
+  }, [order, signer, call, signPaused]);
+
+  function retrySigning() {
+    setError(null);
+    attemptedTx.current = null;
+    setSignPaused(false);
+  }
 
   function start() {
     setError(null);
     setOrder(null);
     attemptedTx.current = null;
+    setSignPaused(false);
     setWantsToBuy(true);
     if (!authenticated) login();
   }
@@ -76,7 +88,7 @@ export function Checkout({ event }: { event: EventPublic }) {
         <Alert>
           {error}{" "}
           {order?.status === "funded" && (
-            <button className="underline" onClick={() => (attemptedTx.current = null)}>Tentar de novo</button>
+            <button className="underline" onClick={retrySigning}>Tentar de novo</button>
           )}
         </Alert>
       )}

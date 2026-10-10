@@ -196,3 +196,16 @@ async def test_organizer_lists_orders(client, auth, live_event):
     r = await client.get(f"/v1/events/{live_event['event']['id']}/orders", headers=auth())
     assert r.status_code == 200 and r.json()[0]["id"] == o["id"]
     assert (await client.get(f"/v1/events/{live_event['event']['id']}/orders", headers=auth(BOB))).status_code == 404
+
+
+async def test_organizer_cannot_buy_own_ticket(client, auth, live_event):
+    """Paying wallet == receiving wallet is rejected onchain (duplicate mutable account): refuse early."""
+    organizer_wallet = live_event["event"]["organizer_wallet"]
+    r = await client.post(
+        "/v1/orders",
+        json={"event_slug": live_event["event"]["slug"], "wallet": organizer_wallet},
+        headers=auth(BOB),
+    )
+    assert r.status_code == 422
+    assert r.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert "organizador" in r.json()["error"]["message"]

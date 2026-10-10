@@ -16,6 +16,7 @@ from ..schemas.actions import (
     ActionsJson,
 )
 from ..services.events import get_live_event_by_slug, read_event_account
+from ..services.orders import SELF_PURCHASE_MESSAGE
 from ..solana.constants import DEVNET_GENESIS_HASH
 from ..solana.instructions import buy_ticket_ix
 from ..solana.pda import ata_address
@@ -97,6 +98,8 @@ async def post_event_action(
         acc = await read_event_account(gateway, row)
     except ApiError as exc:
         return _error(exc.message, exc.status_code)
+    if body.account == row.organizer_wallet:
+        return _error(SELF_PURCHASE_MESSAGE, 400)
     if acc is None:
         return _error("Event not found onchain", 404)
     if acc.sold >= acc.capacity:

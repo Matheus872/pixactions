@@ -21,6 +21,7 @@ from ..solana.tx import build_tx, cosign, message_hash, tx_to_b64
 from ..timeutil import as_utc, utcnow
 from .events import read_event_account
 
+SELF_PURCHASE_MESSAGE = "O organizador não pode comprar ingresso do próprio evento com a mesma carteira"
 OPEN_STATUSES = ("pending_payment", "paid", "funding", "funded")
 FUNDING_TIMEOUT_SECONDS = 90
 
@@ -29,6 +30,9 @@ async def create_order(
     *, session: AsyncSession, event: EventRow, user: User, wallet: str,
     pix: PixProvider, gateway: SolanaGateway,
 ) -> OrderRow:
+    if wallet == event.organizer_wallet:
+        # Same wallet would pay and receive: the program rejects it (duplicate mutable token account).
+        raise ApiError(ErrorCode.VALIDATION_ERROR, SELF_PURCHASE_MESSAGE)
     existing = await session.scalar(
         select(OrderRow).where(
             OrderRow.event_id == event.id,

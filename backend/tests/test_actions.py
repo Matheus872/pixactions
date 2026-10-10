@@ -60,3 +60,12 @@ async def test_action_cors_preflight(client):
     )
     assert r.status_code == 200
     assert r.headers["access-control-allow-origin"] == "*"
+
+
+async def test_action_post_rejects_the_organizer_wallet(client, live_event):
+    r = await client.post(
+        f"/actions/events/{live_event['event']['slug']}",
+        json={"account": live_event["event"]["organizer_wallet"]},
+    )
+    assert r.status_code == 400
+    assert "organizador" in r.json()["message"]
