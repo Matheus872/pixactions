@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: `${event.title} · Pix Actions`,
     description,
     openGraph: { title: event.title, description, ...(event.image_url ? { images: [event.image_url] } : {}) },
+    twitter: { card: "summary_large_image" },
   };
 }
 

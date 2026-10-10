@@ -61,7 +61,7 @@ function EventAdmin({ id }: { id: string }) {
 
   if (event === undefined) return <Spinner label="Carregando…" />;
   if (event === null) return <Alert>Evento não encontrado.</Alert>;
-  const share = `https://wa.me/?text=${encodeURIComponent(`🎟️ ${event.title}: garanta seu ingresso com Pix em ${event.links.checkout_url}`)}`;
+  const share = `https://wa.me/?text=${encodeURIComponent(`🎫 ${event.title}: garanta seu ingresso com Pix em ${event.links.checkout_url}`)}`;
   return (
     <div className="space-y-6">
       <div>
