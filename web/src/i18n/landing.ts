@@ -7,7 +7,7 @@ const pt = {
     title: "Venda on-chain para 180 milhões de brasileiros.",
     accent: "Eles só precisam de Pix.",
     subtitle:
-      "Pix Actions transforma qualquer ação na Solana (ingressos, assinaturas, produtos digitais, doações e tokens) num link de WhatsApp pago com Pix. O comprador não instala carteira. Quem vende recebe na hora.",
+      "Pix Actions transforma qualquer ação na Solana (ingressos, assinaturas, produtos digitais, doações e tokens) num link pago com Pix que funciona em qualquer lugar: WhatsApp, Instagram, site ou QR code impresso. O comprador não instala carteira. Quem vende recebe na hora.",
     primary: "Começar a vender",
     secondary: "Ver demo",
     note: "Demo na Solana devnet · Pix em sandbox",
@@ -25,10 +25,10 @@ const pt = {
   },
   steps: {
     title: "Como funciona",
-    subtitle: "Do link no WhatsApp à entrega on-chain, em quatro passos.",
+    subtitle: "Do link à entrega on-chain, em quatro passos.",
     items: [
       { title: "Crie sua ação", body: "Ingresso, assinatura, produto digital, doação ou token: defina o preço em reais e tudo fica registrado na Solana." },
-      { title: "Compartilhe o link", body: "Mande no WhatsApp, Instagram ou onde quiser. A prévia mostra o que você vende e o preço." },
+      { title: "Compartilhe o link", body: "Mande no WhatsApp, poste no Instagram, coloque no seu site ou imprima o QR code. A prévia mostra o que você vende e o preço." },
       { title: "O comprador paga com Pix", body: "QR ou copia e cola. O Pix vira stablecoin e a compra é assinada automaticamente." },
       { title: "Entrega on-chain", body: "O que foi comprado cai na carteira de quem pagou, com comprovante público. Ingressos ainda têm check-in na porta." },
     ],
@@ -71,7 +71,7 @@ const en: LandingCopy = {
     title: "Sell onchain to 180 million Brazilians.",
     accent: "All they need is Pix.",
     subtitle:
-      "Pix Actions turns any Solana action (tickets, subscriptions, digital products, donations and tokens) into a WhatsApp link paid with Pix. Buyers install no wallet. Sellers get paid instantly.",
+      "Pix Actions turns any Solana action (tickets, subscriptions, digital products, donations and tokens) into a link paid with Pix that works anywhere: WhatsApp, Instagram, a website or a printed QR code. Buyers install no wallet. Sellers get paid instantly.",
     primary: "Start selling",
     secondary: "See the demo",
     note: "Demo on Solana devnet · Pix sandbox",
@@ -89,10 +89,10 @@ const en: LandingCopy = {
   },
   steps: {
     title: "How it works",
-    subtitle: "From a WhatsApp link to onchain delivery, in four steps.",
+    subtitle: "From a link to onchain delivery, in four steps.",
     items: [
       { title: "Create your action", body: "Ticket, subscription, digital product, donation or token: set a BRL price and everything is recorded on Solana." },
-      { title: "Share the link", body: "Send it on WhatsApp, Instagram or anywhere. The preview shows what you sell and the price." },
+      { title: "Share the link", body: "Send it on WhatsApp, post it on Instagram, put it on your website or print the QR code. The preview shows what you sell and the price." },
       { title: "Buyers pay with Pix", body: "QR or copy-paste. Pix becomes a stablecoin and the purchase is signed automatically." },
       { title: "Onchain delivery", body: "What was bought lands in the buyer's wallet with a public receipt. Tickets also get check-in at the door." },
     ],
