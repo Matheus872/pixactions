@@ -17,6 +17,8 @@ from ..errors import ApiError, ErrorCode
 _PROGRAM_ERRORS = {
     6000: (ErrorCode.SOLD_OUT, "Event is sold out"),
     6001: (ErrorCode.ALREADY_CHECKED_IN, "Ticket already checked in"),
+    # Anchor ConstraintSeeds: the ticket PDA was derived from a stale `sold` counter (concurrent purchase).
+    2006: (ErrorCode.TX_STALE, "Ticket slot taken by a concurrent purchase; fetch a fresh transaction"),
 }
 
 

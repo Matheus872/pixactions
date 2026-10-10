@@ -239,6 +239,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/me/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List my tickets
+         * @description Tickets bought by the authenticated buyer (confirmed orders), newest first. Pass `event_slug` so a
+         *     returning buyer sees the tickets they already own for that event instead of buying again.
+         */
+        get: operations["list_my_tickets_v1_me_tickets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/webhooks/pix/{provider}": {
         parameters: {
             query?: never;
@@ -1079,7 +1100,14 @@ export interface components {
             /** Explorer Url */
             explorer_url: string;
         };
-        /** TicketRef */
+        /**
+         * TicketRef
+         * @example {
+         *       "explorer_url": "https://explorer.solana.com/address/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj?cluster=devnet",
+         *       "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+         *       "url": "https://pixactions.vercel.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+         *     }
+         */
         TicketRef: {
             /**
              * Pubkey
@@ -1757,6 +1785,46 @@ export interface operations {
             };
         };
     };
+    list_my_tickets_v1_me_tickets_get: {
+        parameters: {
+            query?: {
+                event_slug?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketRef"][];
+                };
+            };
+            /** @description `UNAUTHORIZED`: missing, invalid or expired Privy access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     pix_webhook_v1_webhooks_pix__provider__post: {
         parameters: {
             query?: never;
@@ -2120,6 +2188,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many requests from this client */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionError"];
                 };
             };
         };

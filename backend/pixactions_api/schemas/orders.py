@@ -46,6 +46,18 @@ class PixChargeOut(BaseModel):
 
 
 class TicketRef(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "pubkey": _TICKET,
+                    "url": f"https://pixactions.vercel.app/t/{_TICKET}",
+                    "explorer_url": f"https://explorer.solana.com/address/{_TICKET}?cluster=devnet",
+                }
+            ]
+        }
+    )
+
     pubkey: str = Field(description="Ticket PDA address.")
     url: str = Field(description="Public verification page (encode this in the entry QR).")
     explorer_url: str

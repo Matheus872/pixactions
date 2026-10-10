@@ -69,3 +69,15 @@ async def test_action_post_rejects_the_organizer_wallet(client, live_event):
     )
     assert r.status_code == 400
     assert "organizador" in r.json()["message"]
+
+
+async def test_action_post_is_rate_limited_per_client(client, live_event, settings):
+    settings.actions_rate_limit = 3
+    slug = live_event["event"]["slug"]
+    codes = [
+        (await client.post(f"/actions/events/{slug}", json={"account": str(Keypair().pubkey())}, headers={"x-forwarded-for": "203.0.113.7"})).status_code
+        for _ in range(4)
+    ]
+    assert codes == [200, 200, 200, 429]
+    other = await client.post(f"/actions/events/{slug}", json={"account": str(Keypair().pubkey())}, headers={"x-forwarded-for": "198.51.100.9"})
+    assert other.status_code == 200

@@ -160,6 +160,8 @@ def test_cosign_rejects_garbage():
         ("Program log: AnchorError ... custom program error: 0x1771", ErrorCode.ALREADY_CHECKED_IN),
         ("InstructionErrorCustom(6000)", ErrorCode.SOLD_OUT),
         ("Allocate: account Address { address: 9x.. } already in use", ErrorCode.TX_STALE),
+        ("custom program error: 0x7d6", ErrorCode.TX_STALE),
+        ("InstructionErrorCustom(2006)", ErrorCode.TX_STALE),
         ("connection reset", ErrorCode.RPC_ERROR),
     ],
 )

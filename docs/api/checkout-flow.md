@@ -75,14 +75,18 @@ curl -X POST https://pixactions-api.vercel.app/v1/orders/$ORDER_ID/submit \
   -d '{"transaction": "<base64 signed by the buyer wallet>"}'
 ```
 
-On success the order is `confirmed` and `ticket` has the ticket PDA, the public verification URL and an explorer link. Submitting again after confirmation returns the same result.
+On success the order is `confirmed` and `ticket` has the ticket PDA, the public verification URL and an explorer link. Submitting again after confirmation returns the same result. If the confirmation is lost but the ticket already landed onchain for this buyer, the API detects it and confirms the order instead of failing.
+
+### 5. Returning buyers
+
+`GET /v1/me/tickets?event_slug=...` lists the tickets the logged-in buyer already owns for an event, so the checkout can show them instead of selling again. A buyer has at most one open order per event.
 
 ## Recovering from transient errors
 
 | Error | Why | What to do |
 |---|---|---|
 | `TX_EXPIRED` (409) | The blockhash expired before submission | Poll `GET /v1/orders/{id}` again; it returns a fresh transaction. Sign and submit it. |
-| `TX_STALE` (409) | Another buyer took the same ticket number at the same time | Same as above: poll, sign the new transaction, submit. |
+| `TX_STALE` (409) | Another buyer took the same ticket number at the same time (onchain `ConstraintSeeds`) | Same as above: poll, sign the new transaction, submit. |
 | `ORDER_NOT_FUNDED` (409) | Submitted before the order was `funded` | Keep polling. |
 | `SOLD_OUT` (409) | No tickets left | Stop; the order moves to `failed`. |
 

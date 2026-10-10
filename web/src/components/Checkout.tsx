@@ -3,11 +3,14 @@ import { usePrivy } from "@privy-io/react-auth";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError, messageFor, type EventPublic, type OrderOut } from "@/lib/api";
+import type { components } from "@/lib/api-types";
 import { formatBRL, formatDate } from "@/lib/format";
 import { useAuthedApi } from "@/lib/useAuthedApi";
 import { useTxSigner } from "@/lib/useTxSigner";
 import { CopyButton } from "./CopyButton";
 import { Alert, Button, Card, BrandButton, Spinner } from "./ui";
+
+type TicketRef = components["schemas"]["TicketRef"];
 
 const ACTIVE = ["pending_payment", "paid", "funding", "funded"];
 const SHOW_DEV = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "1";
@@ -22,6 +25,13 @@ export function Checkout({ event }: { event: EventPublic }) {
   const attemptedTx = useRef<string | null>(null);
   // After an error that will not fix itself (rejected signature, program error) stop prompting the wallet.
   const [signPaused, setSignPaused] = useState(false);
+  // Tickets this buyer already owns for the event (returning buyers must not buy again by accident).
+  const [owned, setOwned] = useState<TicketRef[]>([]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    call<TicketRef[]>(`/v1/me/tickets?event_slug=${encodeURIComponent(event.slug)}`).then(setOwned).catch(() => {});
+  }, [authenticated, call, event.slug, order?.status]);
 
   // 1) Logged in with a wallet → open (or resume) the order.
   useEffect(() => {
@@ -40,10 +50,15 @@ export function Checkout({ event }: { event: EventPublic }) {
   useEffect(() => {
     if (!orderId || !status || !ACTIVE.includes(status)) return;
     const timer = setInterval(() => {
-      call<OrderOut>(`/v1/orders/${orderId}`).then(setOrder).catch((e) => setError(messageFor(e)));
+      call<OrderOut>(`/v1/orders/${orderId}`)
+        .then((o) => {
+          setOrder(o);
+          if (!signPaused) setError(null);
+        })
+        .catch((e) => setError(messageFor(e)));
     }, 2000);
     return () => clearInterval(timer);
-  }, [orderId, status, call]);
+  }, [orderId, status, call, signPaused]);
 
   // 3) Funded → sign once per issued transaction and submit.
   useEffect(() => {
@@ -92,12 +107,24 @@ export function Checkout({ event }: { event: EventPublic }) {
           )}
         </Alert>
       )}
+      {!order && owned.length > 0 && (
+        <Card className="space-y-3">
+          <div className="font-semibold">Você já tem {owned.length === 1 ? "1 ingresso" : `${owned.length} ingressos`} para este evento</div>
+          <div className="flex flex-wrap gap-2">
+            {owned.map((t, i) => (
+              <a key={t.pubkey} href={t.url} className="rounded-xl border border-line px-4 py-2 text-sm font-semibold hover:border-ink">
+                Ver ingresso{owned.length > 1 ? ` ${i + 1}` : ""}
+              </a>
+            ))}
+          </div>
+        </Card>
+      )}
       {!order &&
         (event.sold_out ? (
           <Card className="text-center font-semibold">Esgotado</Card>
         ) : (
           <BrandButton className="w-full" onClick={start} disabled={preparing && authenticated}>
-            {preparing && authenticated ? "Preparando seu Pix…" : `Pagar ${formatBRL(event.price_brl_cents)} com Pix`}
+            {preparing && authenticated ? "Preparando seu Pix…" : owned.length > 0 ? `Comprar outro ingresso (${formatBRL(event.price_brl_cents)})` : `Pagar ${formatBRL(event.price_brl_cents)} com Pix`}
           </BrandButton>
         ))}
       {order?.status === "pending_payment" && order.pix && (
@@ -175,7 +202,7 @@ function TicketCard({ ticket }: { ticket: NonNullable<OrderOut["ticket"]> }) {
     <Card className="glow space-y-4 text-center">
       <div className="text-sm font-semibold text-brand-ink">✓ Ingresso emitido na Solana</div>
       <QRCodeSVG value={ticket.url} size={220} className="mx-auto" />
-      <p className="text-sm text-muted">Apresente este QR na entrada. Ele também fica salvo na sua carteira.</p>
+      <p className="text-sm text-muted">Apresente este QR na entrada. Ele também fica disponível quando você voltar a este link logado com o mesmo e-mail.</p>
       <div className="flex justify-center gap-2">
         <a href={ticket.url} className="rounded-xl border border-line px-4 py-2 text-sm font-semibold">Página do ingresso</a>
         <a href={ticket.explorer_url} target="_blank" rel="noreferrer" className="rounded-xl border border-line px-4 py-2 text-sm font-semibold">Ver no Explorer</a>

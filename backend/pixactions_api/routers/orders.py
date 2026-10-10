@@ -4,9 +4,10 @@ from sqlalchemy import select
 from ..auth import UserDep
 from ..deps import GatewayDep, PixDep, ServiceDep, SessionDep, SettingsDep
 from ..errors import ErrorCode, error_responses
-from ..models import OrderRow
+from ..links import explorer_url, ticket_url
+from ..models import EventRow, OrderRow
 from ..schemas.common import SignedTransaction
-from ..schemas.orders import OrderCreate, OrderOut, OrderSummary
+from ..schemas.orders import OrderCreate, OrderOut, OrderSummary, TicketRef
 from ..services.events import get_live_event_by_slug, get_owned_event
 from ..services.orders import advance_order, create_order, get_buyer_order, order_out, submit_order
 from ..timeutil import as_utc
@@ -94,4 +95,29 @@ async def list_event_orders(event_id: str, user: UserDep, session: SessionDep) -
             ticket_pubkey=o.ticket_pubkey, created_at=as_utc(o.created_at),
         )
         for o in rows
+    ]
+
+
+@router.get(
+    "/me/tickets",
+    response_model=list[TicketRef],
+    summary="List my tickets",
+    responses=error_responses(E.UNAUTHORIZED),
+)
+async def list_my_tickets(
+    user: UserDep, session: SessionDep, settings: SettingsDep, event_slug: str | None = None
+) -> list[TicketRef]:
+    """Tickets bought by the authenticated buyer (confirmed orders), newest first. Pass `event_slug` so a
+    returning buyer sees the tickets they already own for that event instead of buying again."""
+    query = (
+        select(OrderRow)
+        .join(EventRow, EventRow.id == OrderRow.event_id)
+        .where(OrderRow.buyer_did == user.did, OrderRow.status == "confirmed", OrderRow.ticket_pubkey.is_not(None))
+    )
+    if event_slug:
+        query = query.where(EventRow.slug == event_slug)
+    orders = (await session.scalars(query.order_by(OrderRow.created_at.desc()))).all()
+    return [
+        TicketRef(pubkey=o.ticket_pubkey, url=ticket_url(settings, o.ticket_pubkey), explorer_url=explorer_url(settings, o.ticket_pubkey))
+        for o in orders
     ]

@@ -789,6 +789,75 @@
         }
       }
     },
+    "/v1/me/tickets": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "List my tickets",
+        "description": "Tickets bought by the authenticated buyer (confirmed orders), newest first. Pass `event_slug` so a\nreturning buyer sees the tickets they already own for that event instead of buying again.",
+        "operationId": "list_my_tickets_v1_me_tickets_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_slug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TicketRef"
+                  },
+                  "title": "Response List My Tickets V1 Me Tickets Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHORIZED`: missing, invalid or expired Privy access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/webhooks/pix/{provider}": {
       "post": {
         "tags": [
@@ -1246,6 +1315,16 @@
           },
           "409": {
             "description": "Sold out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this client",
             "content": {
               "application/json": {
                 "schema": {
@@ -2591,7 +2670,14 @@
           "url",
           "explorer_url"
         ],
-        "title": "TicketRef"
+        "title": "TicketRef",
+        "examples": [
+          {
+            "explorer_url": "https://explorer.solana.com/address/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj?cluster=devnet",
+            "pubkey": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+            "url": "https://pixactions.vercel.app/t/8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+          }
+        ]
       },
       "ValidationError": {
         "properties": {

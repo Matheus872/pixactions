@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     mock_brl_per_usd: Decimal = Decimal("5.50")
     pix_expiration_seconds: int = 900
     tx_cache_seconds: int = 45
+    actions_rate_limit: int = 20
+    actions_rate_window_seconds: int = 600
     public_web_url: str = "http://localhost:3000"
     public_api_url: str = "http://localhost:8000"
 

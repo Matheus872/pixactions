@@ -113,3 +113,19 @@ async def test_me_events_lists_only_own(client, auth, live_event):
     mine = (await client.get("/v1/me/events", headers=auth())).json()
     theirs = (await client.get("/v1/me/events", headers=auth("did:privy:bob"))).json()
     assert len(mine) == 2 and theirs == []
+
+
+async def test_submit_event_reconciles_when_confirmation_is_lost_but_event_landed(client, auth, gateway):
+    from pixactions_api.errors import ApiError, ErrorCode
+
+    organizer = Keypair()
+    d = await create_draft(client, auth, organizer)
+    seed_event_account(gateway, d["event"])
+    gateway.fail_next = ApiError(ErrorCode.TX_EXPIRED, "not confirmed in time")
+    r = await client.post(
+        f"/v1/events/{d['event']['id']}/submit",
+        json={"transaction": sign_b64(d["transaction"], organizer)},
+        headers=auth(),
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "live"

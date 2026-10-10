@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Response
+from datetime import timedelta
+
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from solders.pubkey import Pubkey
+from sqlalchemy import delete, func, select
 
 from ..deps import GatewayDep, ServiceDep, SessionDep, SettingsDep
 from ..errors import ApiError
+from ..models import ActionHitRow
 from ..pricing import format_token
 from ..schemas.actions import (
     ActionError,
@@ -22,7 +26,7 @@ from ..solana.instructions import buy_ticket_ix
 from ..solana.pda import ata_address
 from ..solana.spl import create_ata_idempotent_ix, mint_to_ix
 from ..solana.tx import build_tx, tx_to_b64
-from ..timeutil import as_utc
+from ..timeutil import as_utc, utcnow
 
 router = APIRouter(tags=["Solana Actions"])
 ACTION_HEADERS = {"X-Action-Version": "2.4", "X-Blockchain-Ids": f"solana:{DEVNET_GENESIS_HASH}"}
@@ -35,6 +39,23 @@ def _headers(response: Response) -> None:
 
 def _error(message: str, status: int) -> JSONResponse:
     return JSONResponse({"message": message}, status_code=status, headers=ACTION_HEADERS)
+
+
+async def _allow_request(request: Request, session, settings) -> bool:
+    """Per-client sliding window stored in the database (works across serverless instances)."""
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_key = (forwarded.split(",")[0].strip() or (request.client.host if request.client else "unknown"))[:64]
+    since = utcnow() - timedelta(seconds=settings.actions_rate_window_seconds)
+    await session.execute(delete(ActionHitRow).where(ActionHitRow.created_at < since))
+    hits = await session.scalar(
+        select(func.count()).select_from(ActionHitRow).where(ActionHitRow.client_key == client_key)
+    )
+    if (hits or 0) >= settings.actions_rate_limit:
+        await session.commit()
+        return False
+    session.add(ActionHitRow(client_key=client_key))
+    await session.commit()
+    return True
 
 
 @router.get("/actions.json", response_model=ActionsJson, summary="Actions rules")
@@ -80,15 +101,17 @@ async def get_event_action(
     "/actions/events/{slug}",
     response_model=ActionPostResponse,
     summary="Build the purchase transaction for a wallet",
-    responses={400: _ERR | {"description": "Invalid account"}, 404: _ERR | {"description": "Event not found"}, 409: _ERR | {"description": "Sold out"}},
+    responses={400: _ERR | {"description": "Invalid account"}, 404: _ERR | {"description": "Event not found"}, 409: _ERR | {"description": "Sold out"}, 429: _ERR | {"description": "Too many requests from this client"}},
 )
 async def post_event_action(
-    slug: str, body: ActionPostRequest, response: Response, session: SessionDep,
+    slug: str, body: ActionPostRequest, request: Request, response: Response, session: SessionDep,
     settings: SettingsDep, gateway: GatewayDep, service: ServiceDep,
 ) -> ActionPostResponse | JSONResponse:
     """Solana Actions POST: returns `buy_ticket` for `account`, already signed by the API as fee payer.
     On devnet the same transaction first mints one ticket's worth of mock USDC to the wallet, so any
     devnet wallet can try the Blink."""
+    if not await _allow_request(request, session, settings):
+        return _error("Too many requests; try again in a few minutes", 429)
     try:
         buyer = Pubkey.from_string(body.account)
     except ValueError:

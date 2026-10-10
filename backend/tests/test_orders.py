@@ -5,11 +5,13 @@ import json
 
 from solders.hash import Hash
 from solders.keypair import Keypair
+from solders.pubkey import Pubkey
 
 from pixactions_api.errors import ApiError, ErrorCode
 from pixactions_api.solana.constants import PROGRAM_ID, TOKEN_PROGRAM_ID
+from pixactions_api.solana.pda import ticket_pda
 from pixactions_api.solana.tx import tx_from_b64
-from tests.helpers import create_draft, seed_event_account, sent_to_program, sign_b64
+from tests.helpers import create_draft, seed_event_account, seed_ticket, sent_to_program, sign_b64
 
 BOB = "did:privy:bob"
 
@@ -130,7 +132,9 @@ async def test_submit_confirms_and_returns_ticket(client, auth, live_event, gate
 async def test_submit_rejects_tampered_tx(client, auth, live_event):
     buyer, other_buyer = Keypair(), Keypair()
     o = await funded_order(client, auth, live_event, buyer)
-    other = await funded_order(client, auth, live_event, other_buyer)
+    other = await new_order(client, auth, live_event["event"]["slug"], other_buyer, did="did:privy:carol")
+    await pay(client, other["id"])
+    other = await get_order(client, auth, other["id"], did="did:privy:carol")
     r = await submit(client, auth, o["id"], sign_b64(other["transaction"], other_buyer))
     assert r.status_code == 400
     assert r.json()["error"]["code"] == "TX_MISMATCH"
@@ -209,3 +213,43 @@ async def test_organizer_cannot_buy_own_ticket(client, auth, live_event):
     assert r.status_code == 422
     assert r.json()["error"]["code"] == "VALIDATION_ERROR"
     assert "organizador" in r.json()["error"]["message"]
+
+
+async def test_submit_reconciles_when_confirmation_is_lost_but_ticket_landed(client, auth, live_event, gateway):
+    """RPC timed out after sending, yet the ticket exists onchain for this buyer: the order is confirmed, not stranded."""
+    buyer = Keypair()
+    o = await funded_order(client, auth, live_event, buyer)
+    ticket = tx_from_b64(o["transaction"]).message.account_keys  # noqa: F841 (built tx references the ticket PDA)
+    seed_ticket(gateway, live_event["event"], serial=0, owner=buyer.pubkey())
+    gateway.fail_next = ApiError(ErrorCode.TX_EXPIRED, "not confirmed in time")
+    r = await submit(client, auth, o["id"], sign_b64(o["transaction"], buyer))
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "confirmed"
+    assert r.json()["ticket"]["pubkey"] == str(ticket_pda(Pubkey.from_string(live_event["event"]["onchain_pubkey"]), 0))
+
+
+async def test_polling_reconciles_a_ticket_that_landed_before_rebuild(client, auth, live_event, gateway, settings):
+    buyer = Keypair()
+    o = await funded_order(client, auth, live_event, buyer)
+    seed_ticket(gateway, live_event["event"], serial=0, owner=buyer.pubkey())
+    settings.tx_cache_seconds = 0  # the cached tx expired: before rebuilding, check whether it already landed
+    again = await get_order(client, auth, o["id"])
+    assert again["status"] == "confirmed"
+
+
+async def test_buyer_can_get_their_tickets_back(client, auth, live_event, gateway):
+    buyer = Keypair()
+    o = await funded_order(client, auth, live_event, buyer)
+    confirmed = (await submit(client, auth, o["id"], sign_b64(o["transaction"], buyer))).json()
+    slug = live_event["event"]["slug"]
+    mine = await client.get(f"/v1/me/tickets?event_slug={slug}", headers=auth(BOB))
+    assert mine.status_code == 200
+    assert [t["pubkey"] for t in mine.json()] == [confirmed["ticket"]["pubkey"]]
+    assert (await client.get(f"/v1/me/tickets?event_slug={slug}", headers=auth("did:privy:mallory"))).json() == []
+
+
+async def test_one_open_order_per_buyer_per_event_even_with_other_wallets(client, auth, live_event):
+    slug = live_event["event"]["slug"]
+    a = await new_order(client, auth, slug, Keypair())
+    b = await new_order(client, auth, slug, Keypair())
+    assert a["id"] == b["id"]

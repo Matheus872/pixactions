@@ -70,6 +70,7 @@ Errors follow the Actions spec, `{"message": "..."}`, instead of the API's usual
 | 400 | `account` is not a valid Solana address |
 | 404 | Event not found or still a draft |
 | 409 | Sold out |
+| 429 | Too many purchase requests from the same client (sliding window, default 20 per 10 minutes) |
 
 ## Try it
 

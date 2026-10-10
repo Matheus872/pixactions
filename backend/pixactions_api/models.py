@@ -71,3 +71,13 @@ class WaitlistRow(Base):
     role: Mapped[str] = mapped_column(String(16))
     lang: Mapped[str] = mapped_column(String(2))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ActionHitRow(Base):
+    """One unauthenticated Solana Actions purchase request, for per-client rate limiting."""
+
+    __tablename__ = "action_hits"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    client_key: Mapped[str] = mapped_column(String(64), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)

@@ -48,6 +48,7 @@ A signed transaction that differs from the issued one is rejected with `TX_MISMA
 | Orders | `POST /v1/orders` | buyer |
 | Orders | `GET /v1/orders/{order_id}` | buyer |
 | Orders | `POST /v1/orders/{order_id}/submit` | buyer |
+| Orders | `GET /v1/me/tickets` | buyer |
 | Tickets | `GET /v1/tickets/{pubkey}` | no |
 | Tickets | `POST /v1/tickets/{pubkey}/checkin` | organizer |
 | Tickets | `POST /v1/tickets/{pubkey}/checkin/submit` | organizer |

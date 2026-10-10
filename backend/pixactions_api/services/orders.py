@@ -13,6 +13,7 @@ from ..models import EventRow, OrderRow
 from ..pix.base import PixProvider
 from ..pix.qr import qr_png_base64
 from ..schemas.orders import OrderOut, PixChargeOut, TicketRef
+from ..solana.accounts import decode_ticket
 from ..solana.gateway import SolanaGateway
 from ..solana.instructions import buy_ticket_ix
 from ..solana.pda import ata_address, ticket_pda
@@ -37,7 +38,6 @@ async def create_order(
         select(OrderRow).where(
             OrderRow.event_id == event.id,
             OrderRow.buyer_did == user.did,
-            OrderRow.buyer_wallet == wallet,
             OrderRow.status.in_(OPEN_STATUSES),
         )
     )
@@ -113,6 +113,22 @@ async def _fund(
     await session.commit()
 
 
+async def _reconcile_purchase(order: OrderRow, *, session: AsyncSession, gateway: SolanaGateway) -> bool:
+    """If the issued purchase already landed (confirmation lost, serverless timeout), confirm the order."""
+    if not order.buy_tx_ticket:
+        return False
+    try:
+        data = await gateway.get_account_data(Pubkey.from_string(order.buy_tx_ticket))
+        ticket = decode_ticket(data) if data else None
+    except (ApiError, ValueError):
+        return False
+    if ticket is None or str(ticket.owner) != order.buyer_wallet:
+        return False
+    order.status, order.ticket_pubkey, order.error = "confirmed", order.buy_tx_ticket, None
+    await session.commit()
+    return True
+
+
 async def _ensure_buy_tx(
     order: OrderRow, event: EventRow, *, session: AsyncSession, settings: Settings,
     gateway: SolanaGateway, service: Keypair,
@@ -120,6 +136,8 @@ async def _ensure_buy_tx(
     """Keep one stable buy_ticket tx per order for `tx_cache_seconds` (polling must not change it)."""
     now = utcnow()
     if order.buy_tx_b64 and order.buy_tx_built_at and (now - order.buy_tx_built_at).total_seconds() < settings.tx_cache_seconds:
+        return
+    if await _reconcile_purchase(order, session=session, gateway=gateway):
         return
     acc = await read_event_account(gateway, event)
     if acc is None:
@@ -183,6 +201,8 @@ async def submit_order(
     try:
         sig = await gateway.send_and_confirm(tx)
     except ApiError as exc:
+        if await _reconcile_purchase(order, session=session, gateway=gateway):
+            return order
         if exc.code in (ErrorCode.TX_STALE, ErrorCode.TX_EXPIRED):
             order.buy_tx_b64 = order.buy_tx_hash = order.buy_tx_built_at = None
         elif exc.code == ErrorCode.SOLD_OUT:

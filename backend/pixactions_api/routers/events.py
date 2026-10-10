@@ -17,6 +17,7 @@ from ..services.events import (
     event_public,
     get_live_event_by_slug,
     get_owned_event,
+    read_event_account,
     read_sold,
     slugify,
 )
@@ -106,7 +107,11 @@ async def submit_event(
     if row.status == "live":
         return event_out(row, settings, sold=await read_sold(gateway, row))
     tx = cosign(body.transaction, row.create_tx_hash or "", service)
-    await gateway.send_and_confirm(tx)
+    try:
+        await gateway.send_and_confirm(tx)
+    except ApiError:
+        if await read_event_account(gateway, row) is None:
+            raise  # really not onchain: surface the error
     row.status = "live"
     row.create_tx_b64 = None
     await session.commit()

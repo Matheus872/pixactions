@@ -17,6 +17,7 @@ from ..schemas.tickets import CheckinSubmit, CheckinTx, TicketEvent, TicketOut
 from ..solana.accounts import TicketAccount, decode_ticket
 from ..solana.gateway import SolanaGateway
 from ..solana.instructions import check_in_ix
+from ..solana.pda import ticket_pda
 from ..solana.tx import build_tx, cosign, message_hash, tx_to_b64
 from ..timeutil import as_utc
 
@@ -51,7 +52,8 @@ async def _load(
         ticket = decode_ticket(data) if data else None
     except ValueError:
         ticket = None
-    if ticket is None:
+    # Only the program can create an account at its PDA: this rejects Ticket-shaped accounts made elsewhere.
+    if ticket is None or pk != ticket_pda(ticket.event, ticket.serial):
         raise ApiError(E.NOT_FOUND, "Ticket not found")
     event = await session.scalar(select(EventRow).where(EventRow.onchain_pubkey == str(ticket.event)))
     return pk, ticket, event

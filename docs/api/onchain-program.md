@@ -47,4 +47,4 @@ The API maps 6000 and 6001 to `SOLD_OUT` and `ALREADY_CHECKED_IN`.
 
 ## Why the API is always the payer
 
-Every instruction takes a separate `payer` that funds rent and fees. The API's service wallet fills that role, so buyers and organizers only sign for what they own (their tokens, their event) and never need SOL. A ticket's serial comes from the event's `sold` counter at build time; if two purchases race for the same serial, the second fails with "already in use" and the API returns `TX_STALE` so the client signs a fresh transaction.
+Every instruction takes a separate `payer` that funds rent and fees. The API's service wallet fills that role, so buyers and organizers only sign for what they own (their tokens, their event) and never need SOL. A ticket's serial comes from the event's `sold` counter at build time; if two purchases race for the same serial, the second fails onchain with Anchor's `ConstraintSeeds` (2006, the ticket PDA no longer matches the new counter) and the API returns `TX_STALE` so the client signs a fresh transaction.
