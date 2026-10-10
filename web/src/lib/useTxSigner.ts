@@ -2,6 +2,7 @@
 import { useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
 import { useCallback } from "react";
 import { b64ToBytes, bytesToB64 } from "./b64";
+import { SOLANA_CHAIN } from "./solana";
 
 /** Signs API-issued transactions with the user's Privy embedded Solana wallet. */
 export function useTxSigner() {
@@ -11,7 +12,7 @@ export function useTxSigner() {
   const sign = useCallback(
     async (txB64: string) => {
       if (!wallet) throw new Error("Carteira ainda não está pronta");
-      const { signedTransaction } = await signTransaction({ transaction: b64ToBytes(txB64), wallet });
+      const { signedTransaction } = await signTransaction({ transaction: b64ToBytes(txB64), wallet, chain: SOLANA_CHAIN });
       return bytesToB64(signedTransaction);
     },
     [wallet, signTransaction],

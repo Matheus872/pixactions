@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Sobe o ambiente local completo: validador Solana (com o programa), API (porta 8001) e web (porta 3000).
 # Uso: ./scripts/dev-up.sh        Logs em /tmp/pixactions-dev/   Para desligar: ./scripts/dev-down.sh
+#      DEV=1 ./scripts/dev-up.sh  web com hot reload (next dev) em vez do build de produção
 # Com SOLANA_RPC_URL=https://api.devnet.solana.com (padrão) sobe só API e web.
 # Com SOLANA_RPC_URL=http://127.0.0.1:8899 também sobe o validador local (cuidado: grava ~110 MB/min no disco)
 # e recria a carteira de serviço e o mint de teste da localnet em backend/.env.
@@ -71,7 +72,16 @@ wait_for "API em http://localhost:8001 (docs em /docs)" curl -sf -m 3 localhost:
 
 echo "4/4 web"
 if ! curl -s -m 3 -o /dev/null localhost:3000 2>/dev/null; then
-  setsid -f bash -c "cd '$ROOT/web' && exec npx next dev" >"$LOGS/web.log" 2>&1 </dev/null
+  if [ "${DEV:-0}" = 1 ]; then
+    # Hot reload para quem está editando código (lento no primeiro acesso de cada página).
+    setsid -f bash -c "cd '$ROOT/web' && exec npx next dev" >"$LOGS/web.log" 2>&1 </dev/null
+  else
+    # Padrão: build de produção (~30 s) e páginas rápidas.
+    echo "  … gerando build de produção da web (cerca de 30 s)"
+    (cd "$ROOT/web" && NODE_OPTIONS=--max-old-space-size=2048 npm run build >"$LOGS/web-build.log" 2>&1) \
+      || { echo "  ✗ build da web falhou; veja $LOGS/web-build.log"; exit 1; }
+    setsid -f bash -c "cd '$ROOT/web' && exec npx next start -p 3000" >"$LOGS/web.log" 2>&1 </dev/null
+  fi
 fi
 wait_for "web em http://localhost:3000" curl -sf -m 60 -o /dev/null localhost:3000/dashboard
 
