@@ -15,9 +15,9 @@ export function AuthGate({ children, title = "Entre para continuar" }: { childre
         <img src="/brand/mark.svg" alt="" className="mx-auto h-12 w-12" />
         <div className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted">Entre com seu e-mail ou celular. Sua carteira Solana é criada na hora.</p>
+          <p className="text-sm text-muted">Entre com seu e-mail. Sua carteira Solana é criada na hora.</p>
         </div>
-        <NeonButton onClick={login} className="w-full">Entrar com e-mail ou celular</NeonButton>
+        <NeonButton onClick={login} className="w-full">Entrar com e-mail</NeonButton>
         <ul className="space-y-2 border-t border-line pt-5 text-left text-sm">
           {PERKS.map((perk) => (
             <li key={perk} className="flex items-center gap-3">

@@ -18,7 +18,7 @@ const pt = {
     subtitle:
       "Para comprar algo on-chain hoje é preciso instalar carteira, anotar 12 palavras, abrir conta em corretora, fazer KYC, comprar e sacar. Cada passo perde gente.",
     items: [
-      { title: "Sem carteira para instalar", body: "Login com e-mail ou celular. A carteira é criada na hora e não é custodial: nem a gente consegue mover seus fundos." },
+      { title: "Sem carteira para instalar", body: "Login só com e-mail. A carteira é criada na hora e não é custodial: nem a gente consegue mover seus fundos." },
       { title: "Organizador recebe na hora", body: "O pagamento cai na carteira do organizador na mesma transação que emite o ingresso. Sem esperar repasse." },
       { title: "Ingresso à prova de fraude", body: "Cada ingresso é uma conta na Solana e o check-in fica gravado on-chain. Print não entra duas vezes." },
     ],
@@ -82,7 +82,7 @@ const en: LandingCopy = {
     subtitle:
       "Buying anything onchain today means installing a wallet, writing down 12 words, opening an exchange account, doing KYC, buying and withdrawing. Every step loses people.",
     items: [
-      { title: "No wallet to install", body: "Log in with email or phone. A non-custodial wallet is created on the spot: not even we can move your funds." },
+      { title: "No wallet to install", body: "Log in with just your email. A non-custodial wallet is created on the spot: not even we can move your funds." },
       { title: "Organizers get paid instantly", body: "Payment lands in the organizer's wallet in the same transaction that issues the ticket. No payout delays." },
       { title: "Fraud-proof tickets", body: "Every ticket is a Solana account and check-in is recorded onchain. A screenshot can't get in twice." },
     ],
