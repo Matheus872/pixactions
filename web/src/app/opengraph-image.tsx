@@ -23,7 +23,7 @@ export default async function OpengraphImage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logoSrc} width={760} height={324} alt="" />
         <div style={{ display: "flex", fontSize: 40, fontWeight: 800, color: "#0B1215" }}>
-          Qualquer ação na Solana,&nbsp;<span style={{ color: "#087F54" }}>paga com Pix.</span>
+          Qualquer ação na Solana,&nbsp;<span style={{ color: "#00873E" }}>paga com Pix.</span>
         </div>
       </div>
     ),

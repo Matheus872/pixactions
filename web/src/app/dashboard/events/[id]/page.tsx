@@ -85,7 +85,7 @@ function EventAdmin({ id }: { id: string }) {
         <div className="break-all font-mono text-sm">{event.links.checkout_url}</div>
         <div className="flex flex-wrap gap-2">
           <CopyButton text={event.links.checkout_url} />
-          <a href={share} target="_blank" rel="noreferrer" className="rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white">Compartilhar no WhatsApp</a>
+          <a href={share} target="_blank" rel="noreferrer" className="rounded-xl bg-brand px-4 py-3 text-sm font-bold text-ink">Compartilhar no WhatsApp</a>
           <a href={event.links.blink_url} target="_blank" rel="noreferrer" className="rounded-xl border border-line px-4 py-3 text-sm font-semibold">Abrir como Blink</a>
           <Link href={`/dashboard/checkin/${event.id}`} className="rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white">Abrir check-in</Link>
         </div>

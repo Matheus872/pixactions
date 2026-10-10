@@ -28,7 +28,7 @@ function EventList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Suas ações</h1>
-        <Link href="/dashboard/new" className="rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white">+ Nova ação</Link>
+        <Link href="/dashboard/new" className="rounded-xl bg-brand px-4 py-2 text-sm font-bold text-ink">+ Nova ação</Link>
       </div>
       {error && <Alert>{error}</Alert>}
       {!events && !error && <Spinner label="Carregando eventos…" />}

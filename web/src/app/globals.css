@@ -5,10 +5,10 @@
   --color-ink: #0b1215;
   --color-muted: #5b6770;
   --color-line: #e6ebe8;
-  --color-brand: #087f54;
-  --color-brand-ink: #026144;
-  --color-brand-soft: #e7f6ee;
-  --color-brand-bright: #1fd18a;
+  --color-brand: #00e676;
+  --color-brand-ink: #00873e;
+  --color-brand-soft: #e9fff2;
+  --color-brand-bright: #00e676;
   --color-slate: #768796;
   --color-danger: #d92d20;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -29,5 +29,5 @@ body {
 }
 
 .glow {
-  box-shadow: 0 0 0 1px rgb(8 127 84 / 0.25), 0 14px 40px -14px rgb(8 127 84 / 0.55);
+  box-shadow: 0 0 0 1px rgb(0 230 118 / 0.35), 0 12px 40px -12px rgb(0 230 118 / 0.55);
 }

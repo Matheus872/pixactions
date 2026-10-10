@@ -39,7 +39,7 @@ export function WaitlistForm({ t, lang }: { t: LandingCopy; lang: Lang }) {
       </div>
       <div className="flex flex-col gap-2 sm:flex-row">
         <input name="email" type="email" required placeholder={t.waitlist.email} className="flex-1 rounded-xl border border-line px-4 py-3" />
-        <button disabled={state === "busy"} className="glow rounded-xl bg-brand px-6 py-3 font-bold text-white disabled:opacity-60">
+        <button disabled={state === "busy"} className="glow rounded-xl bg-brand px-6 py-3 font-bold text-ink disabled:opacity-60">
           {t.waitlist.submit}
         </button>
       </div>

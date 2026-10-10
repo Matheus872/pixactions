@@ -16,7 +16,7 @@ export function Button({ variant = "primary", className = "", ...props }: Button
 export function BrandButton({ className = "", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
-      className={`glow inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-4 text-base font-bold text-white transition hover:bg-brand-ink disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      className={`glow inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-4 text-base font-bold text-ink transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
       {...props}
     />
   );
@@ -48,7 +48,7 @@ export function Logo() {
     <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
       <img src="/brand/mark-256.png" alt="" className="h-8 w-8" />
       <span className="font-extrabold">
-        Pix <span className="text-brand">Actions</span>
+        Pix <span className="text-brand-ink">Actions</span>
       </span>
     </Link>
   );

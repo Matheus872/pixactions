@@ -26,7 +26,7 @@ export function PhoneMock() {
             <span className="text-2xl font-extrabold">R$ 20,00</span>
             <span className="font-mono text-xs text-muted">≈ 3.64 USDC</span>
           </div>
-          <div className="rounded-xl bg-brand py-3 text-center text-sm font-bold text-white">✓ Pix recebido</div>
+          <div className="rounded-xl bg-brand py-3 text-center text-sm font-bold text-ink">✓ Pix recebido</div>
         </div>
       </div>
       <div className="absolute right-0 top-1 sm:-right-4 rotate-6 rounded-2xl border border-line bg-white px-4 py-3 shadow-xl">

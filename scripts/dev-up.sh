@@ -78,6 +78,8 @@ if ! curl -s -m 3 -o /dev/null localhost:3000 2>/dev/null; then
   else
     # Padrão: build de produção (~30 s) e páginas rápidas.
     echo "  … gerando build de produção da web (cerca de 30 s)"
+    # O cache persistente do Turbopack às vezes reaproveita CSS antigo (tema do Tailwind): build limpo.
+    rm -rf "$ROOT/web/.next/cache/turbopack"
     (cd "$ROOT/web" && NODE_OPTIONS=--max-old-space-size=2048 npm run build >"$LOGS/web-build.log" 2>&1) \
       || { echo "  ✗ build da web falhou; veja $LOGS/web-build.log"; exit 1; }
     setsid -f bash -c "cd '$ROOT/web' && exec npx next start -p 3000" >"$LOGS/web.log" 2>&1 </dev/null

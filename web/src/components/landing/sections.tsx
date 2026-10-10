@@ -12,7 +12,7 @@ export function Wordmark({ size = "md" }: { size?: "md" | "lg" }) {
     <span className={`flex items-center gap-2 font-extrabold tracking-tight ${text}`}>
       <img src="/brand/mark-256.png" alt="" className={size === "lg" ? "h-10 w-10" : "h-8 w-8"} />
       <span>
-        Pix <span className="text-brand">Actions</span>
+        Pix <span className="text-brand-ink">Actions</span>
       </span>
     </span>
   );
@@ -40,7 +40,7 @@ export function Nav({ t, lang, onLang }: { t: LandingCopy; lang: Lang; onLang: (
               </button>
             ))}
           </div>
-          <Link href="/dashboard" className="hidden rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-ink sm:block">
+          <Link href="/dashboard" className="hidden rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-ink hover:brightness-95 sm:block">
             {t.nav.cta}
           </Link>
         </div>
@@ -57,12 +57,12 @@ export function Hero({ t, visual }: { t: LandingCopy; visual: React.ReactNode })
         <div className="space-y-6">
           <span className="inline-block rounded-full bg-brand-soft px-3 py-1 font-mono text-xs text-brand-ink">{t.hero.badge}</span>
           <h1 className="text-balance text-4xl font-extrabold leading-[1.05] tracking-tight md:text-5xl xl:text-[3.5rem]">
-            {t.hero.title} <span className="text-brand">{t.hero.accent}</span>
+            {t.hero.title} <span className="text-brand-ink">{t.hero.accent}</span>
           </h1>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate">{t.hero.tagline}</p>
           <p className="max-w-xl text-lg text-muted">{t.hero.subtitle}</p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/dashboard" className="glow rounded-xl bg-brand px-6 py-4 font-bold text-white hover:bg-brand-ink">{t.hero.primary}</Link>
+            <Link href="/dashboard" className="glow rounded-xl bg-brand px-6 py-4 font-bold text-ink hover:brightness-95">{t.hero.primary}</Link>
             <Link href={DEMO} className="rounded-xl border border-ink px-6 py-4 font-semibold hover:bg-ink hover:text-white">{t.hero.secondary}</Link>
           </div>
           <p className="font-mono text-xs text-muted">{t.hero.note}</p>
@@ -127,10 +127,10 @@ export function UseCases({ t }: { t: LandingCopy }) {
             const item = t.useCases.items[id];
             return (
               <div key={id} className={`relative rounded-2xl border bg-white p-6 ${live ? "glow border-brand" : "border-line"}`}>
-                <span className={`absolute right-4 top-4 rounded-full px-2.5 py-1 font-mono text-[11px] ${live ? "bg-brand text-white" : "bg-line/60 text-muted"}`}>
+                <span className={`absolute right-4 top-4 rounded-full px-2.5 py-1 font-mono text-[11px] ${live ? "bg-brand text-ink" : "bg-line/60 text-muted"}`}>
                   {live ? t.useCases.live : t.useCases.soon}
                 </span>
-                <svg viewBox="0 0 24 24" className={`mb-4 h-9 w-9 ${live ? "text-brand" : "text-slate"}`} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <svg viewBox="0 0 24 24" className={`mb-4 h-9 w-9 ${live ? "text-brand-ink" : "text-slate"}`} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   {ICONS[id]}
                 </svg>
                 <h3 className="text-lg font-semibold">{item.title}</h3>
@@ -153,7 +153,7 @@ export function Steps({ t }: { t: LandingCopy }) {
         <ol className="mt-12 grid gap-6 md:grid-cols-4">
           {t.steps.items.map((s, i) => (
             <li key={s.title} className="rounded-2xl border border-line bg-white p-5">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand font-mono text-xl font-extrabold text-white">{i + 1}</div>
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand font-mono text-xl font-extrabold text-ink">{i + 1}</div>
               <h3 className="font-semibold">{s.title}</h3>
               <p className="mt-2 text-sm text-muted">{s.body}</p>
             </li>
@@ -216,7 +216,7 @@ export function FinalCta({ t }: { t: LandingCopy }) {
     <section className={`${wrap} py-24 text-center`}>
       <h2 className="mx-auto max-w-3xl text-3xl font-bold md:text-5xl">{t.final.title}</h2>
       <div className="mt-8 flex justify-center gap-3">
-        <Link href="/dashboard" className="glow rounded-xl bg-brand px-6 py-4 font-bold text-white hover:bg-brand-ink">{t.hero.primary}</Link>
+        <Link href="/dashboard" className="glow rounded-xl bg-brand px-6 py-4 font-bold text-ink hover:brightness-95">{t.hero.primary}</Link>
         <Link href={DEMO} className="rounded-xl border border-ink px-6 py-4 font-semibold hover:bg-ink hover:text-white">{t.hero.secondary}</Link>
       </div>
     </section>

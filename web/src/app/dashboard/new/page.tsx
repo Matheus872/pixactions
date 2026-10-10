@@ -112,7 +112,7 @@ function ActionTypePicker() {
           role="radio"
           aria-checked={type.live}
           disabled={!type.live}
-          className={`rounded-full border px-3 py-1.5 text-sm ${type.live ? "border-brand bg-brand text-white" : "cursor-not-allowed border-line text-muted"}`}
+          className={`rounded-full border px-3 py-1.5 text-sm ${type.live ? "border-brand bg-brand text-ink" : "cursor-not-allowed border-line text-muted"}`}
         >
           {type.label}
           {!type.live && <span className="ml-1 font-mono text-[10px]">em breve</span>}
