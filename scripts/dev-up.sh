@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Sobe o ambiente local completo: validador Solana (com o programa), API (porta 8001) e web (porta 3000).
 # Uso: ./scripts/dev-up.sh        Logs em /tmp/pixactions-dev/   Para desligar: ./scripts/dev-down.sh
-# O validador começa do zero a cada execução; a carteira de serviço e o mint de teste da localnet
-# são recriados e gravados em backend/.env (apenas quando SOLANA_RPC_URL aponta para 127.0.0.1).
+# Com SOLANA_RPC_URL=https://api.devnet.solana.com (padrão) sobe só API e web.
+# Com SOLANA_RPC_URL=http://127.0.0.1:8899 também sobe o validador local (cuidado: grava ~110 MB/min no disco)
+# e recria a carteira de serviço e o mint de teste da localnet em backend/.env.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -17,11 +18,10 @@ wait_for() { # wait_for <descrição> <comando...>
   echo "  ✗ $what não respondeu; veja $LOGS"; exit 1
 }
 
-if ! grep -q "^SOLANA_RPC_URL=http://127.0.0.1:8899" "$ROOT/backend/.env"; then
-  echo "backend/.env não aponta para a localnet (SOLANA_RPC_URL=http://127.0.0.1:8899). Abortando." >&2
-  exit 1
-fi
+LOCALNET=0
+grep -q "^SOLANA_RPC_URL=http://127.0.0.1:8899" "$ROOT/backend/.env" && LOCALNET=1
 
+if [ "$LOCALNET" = 1 ]; then
 echo "1/4 validador local"
 FRESH=0
 if ! solana -u localhost cluster-version >/dev/null 2>&1; then
@@ -58,6 +58,9 @@ rm -f "$ROOT/backend/dev.db"
 else
   echo "  ✓ validador já estava no ar: mantendo carteira de serviço e mint atuais"
 fi
+else
+  echo "1-2/4 rede: devnet (backend/.env). Sem validador local e sem bootstrap."
+fi
 
 echo "3/4 API"
 if ! curl -s -m 3 localhost:8001/health >/dev/null 2>&1; then
@@ -73,4 +76,4 @@ fi
 wait_for "web em http://localhost:3000" curl -sf -m 60 -o /dev/null localhost:3000/dashboard
 
 echo "Pronto: abra http://localhost:3000/dashboard"
-echo "Ao terminar de testar, rode ./scripts/dev-down.sh (o validador consome memória enquanto está ligado)."
+echo "Ao terminar de testar, rode ./scripts/dev-down.sh."
