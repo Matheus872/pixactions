@@ -107,3 +107,22 @@ Mensagem para amigos e para o grupo do hackathon:
 Post no X (marque @colosseum e @SuperteamBR):
 
 > Built Pix Actions for @colosseum World's Fair: pay with Pix, receive onchain. Buyers log in with email, pay a Pix QR code and get an onchain ticket on Solana, no wallet setup. Every event is also a Blink. Try the demo: https://pixactions.vercel.app #Solana @SuperteamBR
+
+---
+
+## 5. Mensagem para o grupo do hackathon (depois de submeter)
+
+[Envie depois da submissão confirmada. Troque o link do vídeo de pitch pelo seu. Se tiver algum número real até lá (compras na demo, inscritos), acrescente uma linha com ele.]
+
+> Fala, pessoal! Submeti meu projeto no Crypto World's Fair: o **Pix Actions** 🚀
+>
+> A ideia: qualquer ação na Solana vira um link pago com Pix. Quem compra entra só com o e-mail, paga o Pix e recebe o ativo on-chain numa carteira criada na hora, sem instalar nada. Quem vende recebe na mesma transação. Comecei por ingressos: venda pelo link, ingresso on-chain e check-in por QR na porta. Cada evento também funciona como Blink.
+>
+> 🎟️ Testa a demo (leva 1 minuto): https://pixactions.vercel.app/e/pix-actions-demo-night-0ed2
+> ⚠️ É devnet e o Pix é simulado: NÃO abra o app do banco, o pagamento confirma sozinho em alguns segundos.
+>
+> 🎥 Pitch: [link do vídeo]
+> 💻 Código aberto (MIT): https://github.com/Matheus872/pixactions
+> 📚 API: https://pixactions-api.vercel.app/docs
+>
+> Qualquer feedback é muito bem-vindo, principalmente de quem organiza eventos ou vende pelo WhatsApp. E se alguém tiver contato com on-ramp de Pix para Solana, adoraria conversar! 🙏
