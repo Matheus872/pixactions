@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Lang, LandingCopy, UseCaseId } from "@/i18n/landing";
+import type { Lang, LandingCopy } from "@/i18n/landing";
 
 const API_DOCS = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/docs`;
 const GITHUB = process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com";
@@ -26,7 +26,6 @@ export function Nav({ t, lang, onLang }: { t: LandingCopy; lang: Lang; onLang: (
           <Wordmark />
         </Link>
         <div className="hidden items-center gap-6 text-sm text-muted md:flex">
-          <a href="#casos" className="hover:text-ink">{t.nav.useCases}</a>
           <a href="#como-funciona" className="hover:text-ink">{t.nav.how}</a>
           <a href="#devs" className="hover:text-ink">{t.nav.devs}</a>
           <a href={API_DOCS} className="hover:text-ink">{t.nav.docs}</a>
@@ -59,7 +58,6 @@ export function Hero({ t, visual }: { t: LandingCopy; visual: React.ReactNode })
           <h1 className="text-balance text-4xl font-extrabold leading-[1.05] tracking-tight md:text-5xl xl:text-[3.5rem]">
             {t.hero.title} <span className="text-brand-ink">{t.hero.accent}</span>
           </h1>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate">{t.hero.tagline}</p>
           <p className="max-w-xl text-lg text-muted">{t.hero.subtitle}</p>
           <div className="flex flex-wrap gap-3">
             <Link href="/dashboard" className="glow rounded-xl bg-brand px-6 py-4 font-bold text-ink hover:brightness-95">{t.hero.primary}</Link>
@@ -99,46 +97,6 @@ export function Problems({ t }: { t: LandingCopy }) {
             <p className="mt-2 text-sm text-muted">{item.body}</p>
           </div>
         ))}
-      </div>
-    </section>
-  );
-}
-
-const ICONS: Record<UseCaseId, React.ReactNode> = {
-  tickets: <path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Zm10-2v12" />,
-  subscriptions: <path d="M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4" />,
-  tokens: <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9Zm0 0v18M4 7.5l8 4.5 8-4.5" />,
-  donations: <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />,
-  digital: <path d="M6 3h8l4 4v14H6Zm8 0v4h4M9 13h6M9 17h6" />,
-  anyAction: <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />,
-};
-
-const USE_CASE_ORDER: UseCaseId[] = ["tickets", "subscriptions", "tokens", "donations", "digital", "anyAction"];
-
-export function UseCases({ t }: { t: LandingCopy }) {
-  return (
-    <section id="casos" className="border-t border-line bg-brand-soft/40">
-      <div className={`${wrap} py-24`}>
-        <h2 className="max-w-3xl text-3xl font-bold md:text-4xl">{t.useCases.title}</h2>
-        <p className="mt-4 max-w-3xl text-muted">{t.useCases.subtitle}</p>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {USE_CASE_ORDER.map((id) => {
-            const live = id === "tickets";
-            const item = t.useCases.items[id];
-            return (
-              <div key={id} className={`relative rounded-2xl border bg-white p-6 ${live ? "glow border-brand" : "border-line"}`}>
-                <span className={`absolute right-4 top-4 rounded-full px-2.5 py-1 font-mono text-[11px] ${live ? "bg-brand text-ink" : "bg-line/60 text-muted"}`}>
-                  {live ? t.useCases.live : t.useCases.soon}
-                </span>
-                <svg viewBox="0 0 24 24" className={`mb-4 h-9 w-9 ${live ? "text-brand-ink" : "text-slate"}`} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  {ICONS[id]}
-                </svg>
-                <h3 className="text-lg font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted">{item.body}</p>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </section>
   );

@@ -77,11 +77,16 @@ if ! curl -s -m 3 -o /dev/null localhost:3000 2>/dev/null; then
     setsid -f bash -c "cd '$ROOT/web' && exec npx next dev" >"$LOGS/web.log" 2>&1 </dev/null
   else
     # Padrão: build de produção (~30 s) e páginas rápidas.
-    echo "  … gerando build de produção da web (cerca de 30 s)"
-    # O cache persistente do Turbopack às vezes reaproveita CSS antigo (tema do Tailwind): build limpo.
-    rm -rf "$ROOT/web/.next/cache/turbopack"
-    (cd "$ROOT/web" && NODE_OPTIONS=--max-old-space-size=2048 npm run build >"$LOGS/web-build.log" 2>&1) \
+    echo "  … gerando build de produção da web (30 s a 2 min)"
+    # O cache do Turbopack reaproveita CSS antigo quando o tema (globals.css) muda: só então ele é apagado.
+    # Fora isso o cache fica: build sem cache é lento e pesado para um WSL de 4 GB.
+    THEME_HASH=$(sha256sum "$ROOT/web/src/app/globals.css" | cut -c1-16)
+    if [ "$(cat "$ROOT/web/.next/.theme-hash" 2>/dev/null)" != "$THEME_HASH" ]; then
+      rm -rf "$ROOT/web/.next/cache/turbopack"
+    fi
+    (cd "$ROOT/web" && NODE_OPTIONS=--max-old-space-size=1536 npm run build >"$LOGS/web-build.log" 2>&1) \
       || { echo "  ✗ build da web falhou; veja $LOGS/web-build.log"; exit 1; }
+    echo "$THEME_HASH" >"$ROOT/web/.next/.theme-hash"
     setsid -f bash -c "cd '$ROOT/web' && exec npx next start -p 3000" >"$LOGS/web.log" 2>&1 </dev/null
   fi
 fi

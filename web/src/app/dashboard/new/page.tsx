@@ -10,7 +10,7 @@ import { useTxSigner } from "@/lib/useTxSigner";
 export default function NewEventPage() {
   return (
     <AppShell>
-      <AuthGate title="Crie sua ação">
+      <AuthGate title="Crie seu evento">
         <NewEventForm />
       </AuthGate>
     </AppShell>
@@ -72,9 +72,7 @@ function NewEventForm() {
   return (
     <Card>
       <form onSubmit={onSubmit} className="space-y-4">
-        <h1 className="text-2xl font-bold">Nova ação</h1>
-        <ActionTypePicker />
-        <p className="text-sm text-muted">Ingresso: venda pelo link, ingresso on-chain na carteira de quem compra e check-in na porta.</p>
+        <h1 className="text-2xl font-bold">Novo evento</h1>
         <input name="title" required minLength={3} maxLength={80} placeholder="Nome do evento" className={input} />
         <textarea name="description" maxLength={1000} placeholder="Descrição (opcional)" className={input} />
         <input name="venue" maxLength={120} placeholder="Local" className={input} />
@@ -93,31 +91,3 @@ function NewEventForm() {
   );
 }
 
-const ACTION_TYPES = [
-  { id: "ticket", label: "Ingresso", live: true },
-  { id: "subscription", label: "Assinatura", live: false },
-  { id: "token", label: "Token", live: false },
-  { id: "donation", label: "Doação", live: false },
-  { id: "digital", label: "Produto digital", live: false },
-  { id: "any", label: "Qualquer Solana Action", live: false },
-];
-
-function ActionTypePicker() {
-  return (
-    <div role="radiogroup" aria-label="Tipo de ação" className="flex flex-wrap gap-2">
-      {ACTION_TYPES.map((type) => (
-        <button
-          key={type.id}
-          type="button"
-          role="radio"
-          aria-checked={type.live}
-          disabled={!type.live}
-          className={`rounded-full border px-3 py-1.5 text-sm ${type.live ? "border-brand bg-brand text-ink" : "cursor-not-allowed border-line text-muted"}`}
-        >
-          {type.label}
-          {!type.live && <span className="ml-1 font-mono text-[10px]">em breve</span>}
-        </button>
-      ))}
-    </div>
-  );
-}

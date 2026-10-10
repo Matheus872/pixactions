@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-export const alt = "Pix Actions: qualquer ação na Solana, paga com Pix";
+export const alt = "Pix Actions: pague com Pix, receba on-chain";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -23,7 +23,7 @@ export default async function OpengraphImage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logoSrc} width={760} height={324} alt="" />
         <div style={{ display: "flex", fontSize: 40, fontWeight: 800, color: "#0B1215" }}>
-          Qualquer ação na Solana,&nbsp;<span style={{ color: "#00873E" }}>paga com Pix.</span>
+          Pague com Pix,&nbsp;<span style={{ color: "#00873E" }}>receba on-chain.</span>
         </div>
       </div>
     ),

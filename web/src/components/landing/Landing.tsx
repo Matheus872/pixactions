@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { copy, type Lang } from "@/i18n/landing";
 import { PhoneMock } from "./PhoneMock";
-import { BuiltWith, Devs, FinalCta, Footer, Hero, Nav, Numbers, Problems, Steps, UseCases } from "./sections";
+import { BuiltWith, Devs, FinalCta, Footer, Hero, Nav, Numbers, Problems, Steps } from "./sections";
 import { WaitlistForm } from "./WaitlistForm";
 
 const KEY = "pixactions.lang";
@@ -39,7 +39,6 @@ export function Landing() {
         <Hero t={t} visual={<PhoneMock />} />
         <BuiltWith t={t} />
         <Problems t={t} />
-        <UseCases t={t} />
         <Steps t={t} />
         <Devs t={t} />
         <Numbers t={t} />

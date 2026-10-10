@@ -65,7 +65,7 @@ function EventAdmin({ id }: { id: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/dashboard" className="text-sm text-muted">← Suas ações</Link>
+        <Link href="/dashboard" className="text-sm text-muted">← Seus eventos</Link>
         <h1 className="mt-2 text-2xl font-bold">{event.title}</h1>
         <p className="text-sm text-muted">{formatDate(event.starts_at)} · {event.venue}</p>
       </div>
