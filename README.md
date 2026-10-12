@@ -53,7 +53,7 @@ sequenceDiagram
 
 ```
 onchain/   Anchor program: events, tickets, check-in (Rust, tests with anchor test)
-backend/   FastAPI: builds transactions, Pix sandbox, mock on-ramp, Solana Actions (Python, 83 tests)
+backend/   FastAPI: builds transactions, Pix sandbox, mock on-ramp, Solana Actions (Python, 93 tests)
 web/       Next.js: landing, Pix checkout, organizer dashboard, QR check-in (Privy embedded wallets)
 docs/      Specs, plans and API guides
 ```

@@ -65,7 +65,7 @@ Pix sits behind a provider interface. Today it's a sandbox that issues a real BR
 Fee payer abstraction lets us hide crypto completely. Fees of a fraction of a cent make a 5 real ticket viable. Confirmation in seconds fits a checkout. And Solana Actions give us a distribution standard: every event is also a Blink, served from `actions.json` on our domain.
 
 **[2:30 a 2:45] Qualidade e fechamento**
-The API has 83 tests and an interactive reference at `/docs`, with guides for every flow. Pix Actions: pay with Pix, receive onchain.
+The API has 93 tests and an interactive reference at `/docs`, with guides for every flow. Pix Actions: pay with Pix, receive onchain.
 
 ---
 
