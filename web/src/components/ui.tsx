@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoutButton } from "./LogoutButton";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" };
 
@@ -59,7 +60,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="bg-grid min-h-dvh">
       <header className="mx-auto flex max-w-3xl items-center justify-between px-4 py-5">
         <Logo />
-        <span className="rounded-full bg-brand-soft px-3 py-1 font-mono text-xs text-brand-ink">devnet</span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-brand-soft px-3 py-1 font-mono text-xs text-brand-ink">devnet</span>
+          <LogoutButton />
+        </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-16">{children}</main>
     </div>
